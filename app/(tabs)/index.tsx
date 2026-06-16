@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useAuth } from "../../src/features/auth/AuthContext";
 import { SetlistCard } from "../../src/features/setlists/SetlistCard";
+import { SetlistFloatingActionMenu } from "../../src/features/setlists/SetlistFloatingActionMenu";
 import { getUserSetlists } from "../../src/features/setlists/setlistService";
 import type { Setlist } from "../../src/features/setlists/types";
 
@@ -91,6 +92,14 @@ export default function SetlistsScreen() {
           <Text style={styles.empty}>No hay setlists cargados.</Text>
         }
         contentContainerStyle={styles.listContent}
+      />
+      <SetlistFloatingActionMenu
+        onCreatePress={() => {
+           router.push("/setlists/create" as any);
+        }}
+        onCodePress={() => {
+          console.log("Generar o compartir código");
+        }}
       />
     </View>
   );

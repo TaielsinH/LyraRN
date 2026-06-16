@@ -18,3 +18,9 @@ export type Partitura = {
   publicId: string;
   url: string;
 };
+export type LocalPdf = {
+  name: string;
+  uri: string;
+  size?: number;
+  mimeType?: string;
+};

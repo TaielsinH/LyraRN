@@ -11,9 +11,17 @@ export default function RootLayout() {
         />
 
         <Stack.Screen
+          name="setlists/create"
+          options={{
+            title: "New Setlist",
+            headerShown: false,
+          }}
+        />
+
+        <Stack.Screen
           name="setlists/[id]"
           options={{
-            title: "Repertorio",
+            title: "Setlist",
           }}
         />
 
