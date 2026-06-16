@@ -6,17 +6,27 @@ export default function RootLayout() {
     <AuthProvider>
       <Stack>
         <Stack.Screen
-          name="login"
+          name="(tabs)"
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="setlists/[id]"
           options={{
-            headerShown: false,
+            title: "Repertorio",
           }}
         />
 
         <Stack.Screen
-          name="(tabs)"
+          name="pdf-viewer"
           options={{
-            headerShown: false,
+            title: "Partitura",
           }}
+        />
+
+        <Stack.Screen
+          name="login"
+          options={{ headerShown: false }}
         />
       </Stack>
     </AuthProvider>
