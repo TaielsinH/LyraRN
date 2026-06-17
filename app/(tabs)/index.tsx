@@ -1,14 +1,16 @@
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { useAuth } from "../../src/features/auth/AuthContext";
+import { logout } from "../../src/features/auth/authService";
 import { SetlistCard } from "../../src/features/setlists/SetlistCard";
 import { SetlistFloatingActionMenu } from "../../src/features/setlists/SetlistFloatingActionMenu";
 import { getUserSetlists } from "../../src/features/setlists/setlistService";
@@ -19,12 +21,15 @@ export default function SetlistsScreen() {
 
   const [setlists, setSetlists] = useState<Setlist[]>([]);
   const [loading, setLoading] = useState(true);
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  async function loadSetlists() {
+  const loadSetlists = useCallback(async () => {
     if (!user) {
+      setSetlists([]);
       setLoading(false);
+      setRefreshing(false);
       return;
     }
 
@@ -41,15 +46,31 @@ export default function SetlistsScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }
+  }, [user]);
 
   useEffect(() => {
     loadSetlists();
-  }, [user]);
+  }, [loadSetlists]);
 
   async function handleRefresh() {
     setRefreshing(true);
     await loadSetlists();
+  }
+
+  async function handleLogout() {
+    try {
+      setLogoutLoading(true);
+      setErrorMessage("");
+
+      await logout();
+
+      router.replace("/login");
+    } catch (error) {
+      console.log("Error cerrando sesion:", error);
+      setErrorMessage("No se pudo cerrar sesion.");
+    } finally {
+      setLogoutLoading(false);
+    }
   }
 
   if (loading) {
@@ -63,7 +84,24 @@ export default function SetlistsScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Setlists</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>Setlists</Text>
+
+        <Pressable
+          disabled={logoutLoading}
+          onPress={handleLogout}
+          style={({ pressed }) => [
+            styles.logoutButton,
+            (pressed || logoutLoading) && styles.logoutButtonPressed,
+          ]}
+        >
+          {logoutLoading ? (
+            <ActivityIndicator color="#ffffff" size="small" />
+          ) : (
+            <Text style={styles.logoutButtonText}>Cerrar sesion</Text>
+          )}
+        </Pressable>
+      </View>
 
       {errorMessage ? (
         <Text style={styles.error}>{errorMessage}</Text>
@@ -95,10 +133,10 @@ export default function SetlistsScreen() {
       />
       <SetlistFloatingActionMenu
         onCreatePress={() => {
-           router.push("/setlists/create" as any);
+          router.push("/setlists/create");
         }}
         onCodePress={() => {
-          console.log("Generar o compartir código");
+          console.log("Generar o compartir codigo");
         }}
       />
     </View>
@@ -120,10 +158,33 @@ const styles = StyleSheet.create({
   loadingText: {
     color: "#6b7280",
   },
+  header: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
   title: {
     fontSize: 28,
     fontWeight: "700",
-    marginBottom: 16,
+  },
+  logoutButton: {
+    alignItems: "center",
+    backgroundColor: "#dc2626",
+    borderRadius: 8,
+    justifyContent: "center",
+    minHeight: 40,
+    minWidth: 118,
+    paddingHorizontal: 14,
+  },
+  logoutButtonPressed: {
+    opacity: 0.75,
+  },
+  logoutButtonText: {
+    color: "#ffffff",
+    fontSize: 14,
+    fontWeight: "700",
   },
   error: {
     color: "#dc2626",
