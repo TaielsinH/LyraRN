@@ -1,5 +1,6 @@
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
+import * as Location from "expo-location";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -12,6 +13,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import MapView, { Marker } from 'react-native-maps';
 import type { LocalPdf } from "../../src/features/setlists/types";
 
 export default function CreateSetlistScreen() {
@@ -20,6 +22,9 @@ export default function CreateSetlistScreen() {
   const [location, setLocation] = useState("");
 
   const [pdfs, setPdfs] = useState<LocalPdf[]>([]);
+
+  const [locationData, setLocationData] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [loadingLocation, setLoadingLocation] = useState(false);
 
   async function handlePickPdf() {
     try {
@@ -58,7 +63,7 @@ export default function CreateSetlistScreen() {
       if (result.canceled) {
         return;
       }
-      
+
       const asset = result.assets[0];
       const photoNumber = pdfs.filter(p => p.mimeType?.includes("image")).length + 1;
 
@@ -76,8 +81,32 @@ export default function CreateSetlistScreen() {
     }
   }
 
-  function handleUseCurrentLocation() {
-    Alert.alert("Mock", "Después implementamos ubicación actual.");
+  async function handleUseCurrentLocation() {
+    setLoadingLocation(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      
+      if (status !== "granted") {
+        Alert.alert("Permiso denegado", "Se necesita permiso de ubicación para usar esta función.");
+        setLoadingLocation(false);
+        return;
+      }
+
+      const currentUserLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+
+      setLocationData({
+        latitude: currentUserLocation.coords.latitude,
+        longitude: currentUserLocation.coords.longitude,
+      });
+
+    } catch (error) {
+      console.log("Error obteniendo ubicación:", error);
+      Alert.alert("Error", "No se pudo obtener la ubicación actual.");
+    } finally {
+      setLoadingLocation(false);
+    }
   }
 
   function handleRemovePdf(uri: string) {
@@ -176,13 +205,44 @@ export default function CreateSetlistScreen() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Location</Text>
-        <Text style={styles.helperText}>Latitude and longitude not loaded</Text>
+      <Text style={styles.sectionTitle}>Location</Text>
+      
+      {locationData ? (
+        <View style={styles.mapContainer}>
+          <MapView
+            style={styles.map}
+            initialRegion={{
+              latitude: locationData.latitude,
+              longitude: locationData.longitude,
+              latitudeDelta: 0.005, 
+              longitudeDelta: 0.005,
+            }}
+          >
+            <Marker 
+              coordinate={{
+                latitude: locationData.latitude,
+                longitude: locationData.longitude,
+              }}
+              title="Lugar del show"
+            />
+          </MapView>
+        </View>
+      ) : (
+        <Text style={styles.helperText}>
+          {loadingLocation ? "Cargando mapa y coordenadas..." : "Latitude and longitude not loaded"}
+        </Text>
+      )}
 
-        <Pressable style={styles.outlineButtonFull} onPress={handleUseCurrentLocation}>
-          <Text style={styles.outlineButtonText}>Use current location</Text>
-        </Pressable>
-      </View>
+    <Pressable 
+      style={[styles.outlineButtonFull, loadingLocation && { opacity: 0.6 }]} 
+      onPress={handleUseCurrentLocation}
+      disabled={loadingLocation}
+    >
+      <Text style={styles.outlineButtonText}>
+        {loadingLocation ? "Obteniendo ubicación..." : "Use current location"}
+      </Text>
+    </Pressable>
+  </View>
 
       <Pressable style={styles.primaryButton} onPress={handleCreateSetlist}>
         <Text style={styles.primaryButtonText}>Create Setlist</Text>
@@ -269,6 +329,24 @@ const styles = StyleSheet.create({
   helperText: {
     color: "#9ca3af",
     fontSize: 15,
+  },
+  locationSuccessText: {
+    color: "#4ade80", 
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  mapContainer: {
+    width: "100%",
+    height: 180, 
+    borderRadius: 8,
+    overflow: "hidden",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#334155",
+  },
+  map: {
+    width: "100%",
+    height: "100%",
   },
   pdfItem: {
     borderWidth: 1,
