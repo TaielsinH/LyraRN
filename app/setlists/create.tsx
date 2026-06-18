@@ -1,15 +1,16 @@
 import * as DocumentPicker from "expo-document-picker";
+import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    Alert,
-    FlatList,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  FlatList,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import type { LocalPdf } from "../../src/features/setlists/types";
 
@@ -46,8 +47,33 @@ export default function CreateSetlistScreen() {
     }
   }
 
-  function handleTakePhoto() {
-    Alert.alert("Mock", "Después implementamos tomar foto.");
+  async function handleTakePhoto() {
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'], 
+        quality: 0.8,           
+        allowsEditing: true,    
+      });
+
+      if (result.canceled) {
+        return;
+      }
+      
+      const asset = result.assets[0];
+      const photoNumber = pdfs.filter(p => p.mimeType?.includes("image")).length + 1;
+
+      const newPhotoAsPdf: LocalPdf = {
+        name: `Foto ${photoNumber}`,
+        uri: asset.uri,
+        size: 1024 * 500,
+        mimeType: "image/jpeg",
+      };
+
+      setPdfs((currentPdfs) => [...currentPdfs, newPhotoAsPdf]);
+    } catch (error) {
+      console.log("Error al abrir la cámara:", error);
+      Alert.alert("Error", "No se pudo abrir la cámara de forma nativa.");
+    }
   }
 
   function handleUseCurrentLocation() {
@@ -125,6 +151,7 @@ export default function CreateSetlistScreen() {
         ) : (
           <FlatList
             data={pdfs}
+            extraData={pdfs}
             keyExtractor={(item) => item.uri}
             scrollEnabled={false}
             renderItem={({ item }) => (
@@ -132,7 +159,10 @@ export default function CreateSetlistScreen() {
                 <View style={styles.pdfInfo}>
                   <Text style={styles.pdfName}>{item.name}</Text>
                   <Text style={styles.pdfMeta}>
-                    {item.size ? `${Math.round(item.size / 1024)} KB` : "PDF local"}
+                    {item.mimeType?.includes("image") 
+                      ? "Imagen capturada" 
+                      : `${Math.round((item.size || 0) / 1024)} KB`
+                    }
                   </Text>
                 </View>
 
