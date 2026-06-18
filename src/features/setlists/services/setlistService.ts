@@ -7,8 +7,8 @@ import {
   query,
   where,
 } from "firebase/firestore";
-import { db } from "../../services/firebase";
-import type { Partitura, Setlist } from "./types";
+import { db } from "../../../services/firebase";
+import type { Partitura, Setlist } from "../types";
 
 function mapSetlist(docId: string, data: any, userId: string): Setlist {
   const partituras: Partitura[] = Array.isArray(data.partituras)
