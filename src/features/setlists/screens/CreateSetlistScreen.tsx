@@ -6,6 +6,8 @@ import { useState } from "react";
 import {
   Alert,
   FlatList,
+  Image,
+  Modal,
   Pressable,
   ScrollView,
   Text,
@@ -25,6 +27,9 @@ export default function CreateSetlistScreen() {
 
   const [locationData, setLocationData] = useState<{ latitude: number; longitude: number } | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
+
+  const [isCameraModalVisible, setIsCameraModalVisible] = useState(false);
+  const [localPhotosQueue, setLocalPhotosQueue] = useState<string[]>([]);
 
   async function handlePickPdf() {
     try {
@@ -53,32 +58,68 @@ export default function CreateSetlistScreen() {
   }
 
   async function handleTakePhoto() {
+    setLocalPhotosQueue([]); 
+    setIsCameraModalVisible(true); 
+  }
+
+  async function handleCapturePage() {
     try {
       const result = await ImagePicker.launchCameraAsync({
         mediaTypes: ['images'], 
         quality: 0.8,           
-        allowsEditing: true,    
+        allowsEditing: false, 
       });
 
-      if (result.canceled) {
-        return;
-      }
+      if (result.canceled) return;
 
-      const asset = result.assets[0];
-      const photoNumber = pdfs.filter(p => p.mimeType?.includes("image")).length + 1;
+      const newPhotoUri = result.assets[0].uri;
 
-      const newPhotoAsPdf: LocalPdf = {
-        name: `Foto ${photoNumber}`,
-        uri: asset.uri,
-        size: 1024 * 500,
-        mimeType: "image/jpeg",
-      };
+      setLocalPhotosQueue((currentQueue) => {
+        const updatedQueue = [...currentQueue, newPhotoUri];
 
-      setPdfs((currentPdfs) => [...currentPdfs, newPhotoAsPdf]);
+        setTimeout(() => {
+          Alert.alert(
+            `Página ${updatedQueue.length} capturada`,
+            "¿Querés capturar la siguiente página de esta partitura?",
+            [
+              {
+                text: "No, terminar",
+                style: "cancel",
+              },
+              {
+                text: "Sí, sacar otra",
+                onPress: () => handleCapturePage(),
+              },
+            ]
+          );
+        }, 300);
+
+        return updatedQueue;
+      });
+
     } catch (error) {
-      console.log("Error al abrir la cámara:", error);
-      Alert.alert("Error", "No se pudo abrir la cámara de forma nativa.");
+      console.log("Error al capturar la foto:", error);
+      Alert.alert("Error", "No se pudo capturar la foto.");
     }
+  }
+
+  function handleSaveCapturedBatch() {
+    if (localPhotosQueue.length === 0) {
+      Alert.alert("Cola vacia", "Saca una foto para comenzar a crear el PDF.");
+      return;
+    }
+
+    const totalPages = localPhotosQueue.length;
+    
+    const singleCombinedPdf: LocalPdf = {
+      name: `Partitura (${totalPages} ${totalPages === 1 ? 'pág' : 'págs'})`,
+      uri: localPhotosQueue[0], 
+      size: 1024 * 500 * totalPages,
+      mimeType: "application/pdf", 
+    };
+
+    setPdfs((currentPdfs) => [...currentPdfs, singleCombinedPdf]);
+    setIsCameraModalVisible(false); 
   }
 
   async function handleUseCurrentLocation() {
@@ -205,29 +246,29 @@ export default function CreateSetlistScreen() {
       </View>
 
       <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Location</Text>
-      
-      {locationData ? (
-        <LocationMap coordinate={locationData} />
-      ) : (
-        <Text style={styles.helperText}>
-          {loadingLocation ? "Cargando mapa y coordenadas..." : "Latitude and longitude not loaded"}
-        </Text>
-      )}
+        <Text style={styles.sectionTitle}>Location</Text>
+        
+        {locationData ? (
+          <LocationMap coordinate={locationData} />
+        ) : (
+          <Text style={styles.helperText}>
+            {loadingLocation ? "Cargando mapa y coordenadas..." : "Latitude and longitude not loaded"}
+          </Text>
+        )}
 
-    <Pressable 
-      style={[
-        styles.outlineButtonFull,
-        loadingLocation && styles.outlineButtonDisabled,
-      ]} 
-      onPress={handleUseCurrentLocation}
-      disabled={loadingLocation}
-    >
-      <Text style={styles.outlineButtonText}>
-        {loadingLocation ? "Obteniendo ubicación..." : "Use current location"}
-      </Text>
-    </Pressable>
-  </View>
+        <Pressable 
+          style={[
+            styles.outlineButtonFull,
+            loadingLocation && styles.outlineButtonDisabled,
+          ]} 
+          onPress={handleUseCurrentLocation}
+          disabled={loadingLocation}
+        >
+          <Text style={styles.outlineButtonText}>
+            {loadingLocation ? "Obteniendo ubicación..." : "Use current location"}
+          </Text>
+        </Pressable>
+      </View>
 
       <Pressable style={styles.primaryButton} onPress={handleCreateSetlist}>
         <Text style={styles.primaryButtonText}>Create Setlist</Text>
@@ -236,7 +277,57 @@ export default function CreateSetlistScreen() {
       <Pressable style={styles.cancelButton} onPress={() => router.back()}>
         <Text style={styles.cancelButtonText}>Cancel</Text>
       </Pressable>
-    </ScrollView>
-  );
-}
 
+      <Modal 
+        visible={isCameraModalVisible} 
+        animationType="slide" 
+        transparent={false}
+        onRequestClose={() => setIsCameraModalVisible(false)} 
+      >
+        <View style={styles.modalContainer}>
+          
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Capturar Partitura</Text>
+            <Text style={styles.modalSubtitle}>Toma una foto para convertirla en PDF</Text>
+            <Text style={styles.modalQueueText}>
+              Páginas en cola: {localPhotosQueue.length}
+            </Text>
+          </View>
+
+          <View style={styles.modalImageArea}>
+            {localPhotosQueue.length > 0 ? (
+              <ScrollView 
+                style={styles.modalScrollView}
+                contentContainerStyle={styles.modalScrollContent}
+                showsVerticalScrollIndicator={true}
+              >
+                {localPhotosQueue.map((uri, index) => (
+                  <View key={index} style={styles.modalImageWrapper}>
+                    <Image 
+                      source={{ uri: uri }} 
+                      style={styles.modalImage}
+                      resizeMode="cover"
+                    />
+                  </View>
+                ))}
+              </ScrollView>
+            ) : (
+              <View style={styles.emptyFlex} />
+            )}
+          </View>
+
+          <View style={styles.modalFooter}>
+            <Pressable onPress={handleCapturePage} style={styles.captureButton}>
+              <Text style={styles.modalButtonText}>Tomar Foto</Text>
+            </Pressable>
+
+            <Pressable onPress={handleSaveCapturedBatch} style={styles.saveButton}>
+              <Text style={styles.modalButtonText}>Guardar</Text>
+            </Pressable>
+          </View>
+
+        </View>
+      </Modal>
+
+    </ScrollView>
+  );}
