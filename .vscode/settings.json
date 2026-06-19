@@ -3,5 +3,8 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
-  }
+    
+  },
+  "workbench.tree.indent": 18,
+  "workbench.tree.renderIndentGuides": "always"
 }
