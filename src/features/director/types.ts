@@ -6,3 +6,14 @@ export type Agrupacion = {
     directorId: string;
     active: boolean;
 }
+export type Show = {
+    id: string;
+    nombre: string;
+    fecha: string | null;
+    active: boolean;
+    setlistMaster: SetlistMasterItem[];
+}
+export type SetlistMasterItem = {
+    id: string;
+    nombre: string;
+};

@@ -2,10 +2,12 @@ import { useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  Pressable,
   Text,
   View
 } from "react-native";
 
+import { useRouter } from "expo-router";
 import { FloatingActionButton } from "../../../shared/components/FloatingActionButton";
 import { useAuth } from "../../auth/context/AuthContext";
 import { CreateAgrupacionDialog } from "../components/CreateAgrupacionDialog";
@@ -16,6 +18,7 @@ import { styles } from "./DirectorScreen.styles";
 export default function DirectorScreen() {
   const { user } = useAuth();
   const [dialogVisible, setDialogVisible] = useState(false);
+  const router = useRouter();
 
   const {
     agrupaciones,
@@ -31,11 +34,23 @@ export default function DirectorScreen() {
 
   function renderAgrupacion({ item }: { item: Agrupacion }) {
     return (
-      <View style={styles.card}>
+      <Pressable
+        style={styles.card}
+        onPress={() => handleAgrupacionPress(item)}
+      >
         <Text style={styles.cardTitle}>{item.nombre}</Text>
-      </View>
+      </Pressable>
     );
   }
+  function handleAgrupacionPress(agrupacion: Agrupacion) {
+  router.push({
+    pathname: "/agrupaciones/[agrupacionId]/shows",
+    params: {
+      agrupacionId: agrupacion.id,
+      nombre: agrupacion.nombre,
+    },
+  });
+}
 
   return (
     <View style={styles.container}>
