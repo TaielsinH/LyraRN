@@ -79,9 +79,22 @@ export const styles = StyleSheet.create({
     fontSize: 15,
   },
   locationSuccessText: {
-    color: "#4ade80",
+    color: "#4ade80", 
     fontSize: 15,
     fontWeight: "600",
+  },
+  mapContainer: {
+    width: "100%",
+    height: 180, 
+    borderRadius: 8,
+    overflow: "hidden",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#334155",
+  },
+  map: {
+    width: "100%",
+    height: "100%",
   },
   pdfItem: {
     borderWidth: 1,
@@ -129,6 +142,83 @@ export const styles = StyleSheet.create({
   },
   cancelButtonText: {
     color: "#9ca3af",
+    fontWeight: "700",
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "#0b121f",
+    padding: 24,
+    justifyContent: 'space-between',
+  },
+  modalHeader: {
+    marginTop: 40,
+    paddingHorizontal: 4,
+  },
+  modalTitle: {
+    color: "#ffffff",
+    fontSize: 32,
+    fontWeight: "800",
+  },
+  modalSubtitle: {
+    color: "#7e8a9c",
+    fontSize: 16,
+    marginTop: 6,
+  },
+  modalQueueText: {
+    color: "#2563eb",
+    fontSize: 16,
+    fontWeight: "700",
+    marginTop: 14,
+  },
+  modalImageArea: {
+    flex: 1,
+    marginVertical: 16,
+  },
+  modalScrollView: {
+    flex: 1,
+    width: '100%',
+  },
+  modalScrollContent: {
+    gap: 16,
+    paddingBottom: 16,
+  },
+  modalImageWrapper: {
+    width: '100%',
+    height: 260,
+    borderRadius: 8,
+    overflow: 'hidden',
+    backgroundColor: '#131c2e',
+  },
+  modalImage: {
+    width: '100%',
+    height: '100%',
+  },
+  emptyFlex: {
+    flex: 1,
+  },
+  modalFooter: {
+    marginBottom: 16,
+    alignItems: 'center',
+    gap: 14,
+    width: '100%',
+  },
+  captureButton: {
+    backgroundColor: "#f9570c",
+    borderRadius: 28,
+    paddingVertical: 10,
+    width: '92%',
+    alignItems: 'center',
+  },
+  saveButton: {
+    backgroundColor: "#10b981",
+    borderRadius: 28,
+    paddingVertical: 10,
+    width: '92%',
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: "#ffffff",
+    fontSize: 16,
     fontWeight: "700",
   },
 });
