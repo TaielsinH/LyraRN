@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 import {
     createAgrupacion,
     getAgrupacionesByDirector,
+    softDeleteAgrupaciones,
+    updateAgrupacion,
 } from "../services/agrupacionService";
 import type { Agrupacion } from "../types";
 
@@ -10,6 +12,8 @@ export function useAgrupaciones(directorId?: string) {
   const [agrupaciones, setAgrupaciones] = useState<Agrupacion[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const loadAgrupaciones = useCallback(async () => {
@@ -72,6 +76,65 @@ export function useAgrupaciones(directorId?: string) {
     [directorId]
   );
 
+  const updateAgrupacionNombre = useCallback(
+    async (id: string, nombre: string) => {
+      try {
+        setUpdating(true);
+        setErrorMessage("");
+
+        await updateAgrupacion(id, { nombre });
+
+        setAgrupaciones((current) =>
+          current
+            .map((item) =>
+              item.id === id ? { ...item, nombre: nombre.trim() } : item
+            )
+            .sort((a, b) => a.nombre.localeCompare(b.nombre))
+        );
+      } catch (error) {
+        console.error(error);
+
+        if (error instanceof Error) {
+          setErrorMessage(error.message);
+          throw error;
+        }
+
+        const fallbackMessage = "No se pudo editar la agrupación.";
+        setErrorMessage(fallbackMessage);
+        throw new Error(fallbackMessage);
+      } finally {
+        setUpdating(false);
+      }
+    },
+    []
+  );
+
+  const deleteAgrupaciones = useCallback(async (ids: string[]) => {
+    try {
+      setDeleting(true);
+      setErrorMessage("");
+
+      await softDeleteAgrupaciones(ids);
+
+      setAgrupaciones((current) =>
+        current.filter((item) => !ids.includes(item.id))
+      );
+    } catch (error) {
+      console.error(error);
+
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+        throw error;
+      }
+
+      const fallbackMessage = "No se pudieron eliminar las agrupaciones.";
+      setErrorMessage(fallbackMessage);
+      throw new Error(fallbackMessage);
+    } finally {
+      setDeleting(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadAgrupaciones();
   }, [loadAgrupaciones]);
@@ -80,8 +143,12 @@ export function useAgrupaciones(directorId?: string) {
     agrupaciones,
     loading,
     creating,
+    updating,
+    deleting,
     errorMessage,
     loadAgrupaciones,
     createNewAgrupacion,
+    updateAgrupacionNombre,
+    deleteAgrupaciones,
   };
 }
