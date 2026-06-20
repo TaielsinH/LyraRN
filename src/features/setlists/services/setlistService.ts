@@ -1,10 +1,12 @@
 import {
+  addDoc,
   collection,
   doc,
   getDoc,
   getDocs,
   orderBy,
   query,
+  serverTimestamp,
   where,
 } from "firebase/firestore";
 import { db } from "../../../services/firebase";
@@ -62,4 +64,53 @@ export async function getUserSetlistById(
   }
 
   return mapSetlist(snapshot.id, snapshot.data(), userId);
+}
+
+function generateCodigoCompartir(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return code;
+}
+
+type CreateSetlistParams = {
+  ownerId: string;
+  titulo: string;
+  nombreGrupo: string;
+  ubicacion: string;
+  partituras: Partitura[];
+};
+
+export async function createSetlist({
+  ownerId,
+  titulo,
+  nombreGrupo,
+  ubicacion,
+  partituras,
+}: CreateSetlistParams): Promise<Setlist> {
+  const tituloNormalizado = titulo.trim();
+
+  if (!tituloNormalizado) {
+    throw new Error("El título del setlist es obligatorio.");
+  }
+
+  const setlistsRef = collection(db, "usuarios", ownerId, "setlists");
+
+  const docRef = await addDoc(setlistsRef, {
+    codigoCompartir: generateCodigoCompartir(),
+    fechaCreacion: serverTimestamp(),
+    isActive: true,
+    nombreGrupo: nombreGrupo.trim(),
+    ownerId,
+    partituras,
+    suscriptores: [],
+    titulo: tituloNormalizado,
+    ubicacion: ubicacion.trim(),
+  });
+
+  const snapshot = await getDoc(docRef);
+
+  return mapSetlist(snapshot.id, snapshot.data(), ownerId);
 }

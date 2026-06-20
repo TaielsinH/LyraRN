@@ -4,6 +4,7 @@ import * as Location from "expo-location";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   FlatList,
   Image,
@@ -14,16 +15,22 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { uploadPdfToCloudinary } from "../../../services/cloudinary";
+import { useAuth } from "../../auth/context/AuthContext";
 import { LocationMap } from "../components/LocationMap";
+import { createSetlist } from "../services/setlistService";
 import type { LocalPdf } from "../types";
 import { styles } from "./CreateSetlistScreen.styles";
 
 export default function CreateSetlistScreen() {
+  const { user } = useAuth();
+
   const [title, setTitle] = useState("");
   const [groupName, setGroupName] = useState("");
   const [location, setLocation] = useState("");
 
   const [pdfs, setPdfs] = useState<LocalPdf[]>([]);
+  const [creatingSetlist, setCreatingSetlist] = useState(false);
 
   const [locationData, setLocationData] = useState<{ latitude: number; longitude: number } | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(false);
@@ -154,18 +161,67 @@ export default function CreateSetlistScreen() {
     setPdfs((currentPdfs) => currentPdfs.filter((pdf) => pdf.uri !== uri));
   }
 
-  function handleCreateSetlist() {
-    console.log("Crear setlist mock:", {
-      title,
-      groupName,
-      location,
-      pdfs,
-    });
+  async function handleCreateSetlist() {
+    if (!user) {
+      Alert.alert("Error", "No hay un usuario autenticado.");
+      return;
+    }
 
-    Alert.alert(
-      "Mock",
-      `Setlist listo para crear con ${pdfs.length} PDF(s). Después conectamos Cloudinary y Firestore.`
-    );
+    const tituloNormalizado = title.trim();
+
+    if (!tituloNormalizado) {
+      Alert.alert("Falta el título", "Ingresá un nombre para el setlist.");
+      return;
+    }
+
+    if (pdfs.length === 0) {
+      Alert.alert(
+        "Sin partituras",
+        "Agregá al menos un PDF antes de crear el setlist."
+      );
+      return;
+    }
+
+    try {
+      setCreatingSetlist(true);
+
+      const partituras = await Promise.all(
+        pdfs.map(async (pdf) => {
+          const uploaded = await uploadPdfToCloudinary(pdf.uri, pdf.name);
+          return {
+            nombre: pdf.name,
+            publicId: uploaded.publicId,
+            url: uploaded.url,
+          };
+        })
+      );
+
+      const ubicacionFinal =
+        location.trim() ||
+        (locationData
+          ? `${locationData.latitude},${locationData.longitude}`
+          : "");
+
+      await createSetlist({
+        ownerId: user.uid,
+        titulo: tituloNormalizado,
+        nombreGrupo: groupName.trim(),
+        ubicacion: ubicacionFinal,
+        partituras,
+      });
+
+      Alert.alert("Listo", "El setlist se creó correctamente.");
+      router.back();
+    } catch (error) {
+      console.log("Error creando setlist:", error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "No se pudo crear el setlist.";
+      Alert.alert("Error", message);
+    } finally {
+      setCreatingSetlist(false);
+    }
   }
 
   return (
@@ -270,11 +326,26 @@ export default function CreateSetlistScreen() {
         </Pressable>
       </View>
 
-      <Pressable style={styles.primaryButton} onPress={handleCreateSetlist}>
-        <Text style={styles.primaryButtonText}>Create Setlist</Text>
+      <Pressable
+        style={[
+          styles.primaryButton,
+          creatingSetlist && styles.outlineButtonDisabled,
+        ]}
+        onPress={handleCreateSetlist}
+        disabled={creatingSetlist}
+      >
+        {creatingSetlist ? (
+          <ActivityIndicator color="#ffffff" />
+        ) : (
+          <Text style={styles.primaryButtonText}>Create Setlist</Text>
+        )}
       </Pressable>
 
-      <Pressable style={styles.cancelButton} onPress={() => router.back()}>
+      <Pressable
+        style={styles.cancelButton}
+        onPress={() => router.back()}
+        disabled={creatingSetlist}
+      >
         <Text style={styles.cancelButtonText}>Cancel</Text>
       </Pressable>
 
