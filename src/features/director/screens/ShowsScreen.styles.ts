@@ -35,6 +35,15 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#e5e5e5",
   },
+  cardSelected: {
+    borderColor: "#5b3f96",
+    backgroundColor: "#f5f3fb",
+  },
+  checkbox: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+  },
   cardTitle: {
     fontSize: 18,
     fontWeight: "700",

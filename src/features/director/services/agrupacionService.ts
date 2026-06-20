@@ -4,6 +4,7 @@ import {
     getDocs,
     query,
     setDoc,
+    updateDoc,
     where,
 } from "firebase/firestore";
 
@@ -52,4 +53,29 @@ export async function getAgrupacionesByDirector(
     const snapshot = await getDocs(q);
 
     return snapshot.docs.map((doc) => doc.data() as Agrupacion);
+}
+
+type UpdateAgrupacionParams = {
+    nombre: string;
+}
+
+export async function updateAgrupacion(
+    id: string,
+    { nombre }: UpdateAgrupacionParams
+): Promise<void> {
+    const nombreNormalizado = nombre.trim();
+
+    if (!nombreNormalizado) {
+        throw new Error("El nombre de la agrupación es obligatorio.");
+    }
+
+    const docRef = doc(db, "agrupaciones", id);
+
+    await updateDoc(docRef, { nombre: nombreNormalizado });
+}
+
+export async function softDeleteAgrupaciones(ids: string[]): Promise<void> {
+    await Promise.all(
+        ids.map((id) => updateDoc(doc(db, "agrupaciones", id), { active: false }))
+    );
 }

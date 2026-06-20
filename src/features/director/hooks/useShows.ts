@@ -3,6 +3,8 @@ import { useCallback, useEffect, useState } from "react";
 import {
     createShow,
     getShowsByAgrupacion,
+    softDeleteShows,
+    updateShow,
 } from "../services/showService";
 import type { Show } from "../types";
 
@@ -10,6 +12,8 @@ export function useShows(agrupacionId?: string) {
   const [shows, setShows] = useState<Show[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
   const loadShows = useCallback(async () => {
@@ -73,6 +77,76 @@ export function useShows(agrupacionId?: string) {
     [agrupacionId]
   );
 
+  const updateShowNombre = useCallback(
+    async (id: string, nombre: string, fecha?: string) => {
+      if (!agrupacionId) {
+        throw new Error("No se encontró la agrupación.");
+      }
+
+      try {
+        setUpdating(true);
+        setErrorMessage("");
+
+        await updateShow(agrupacionId, id, { nombre, fecha });
+
+        setShows((current) =>
+          current
+            .map((item) =>
+              item.id === id
+                ? { ...item, nombre: nombre.trim(), fecha: fecha?.trim() || null }
+                : item
+            )
+            .sort((a, b) => a.nombre.localeCompare(b.nombre))
+        );
+      } catch (error) {
+        console.error(error);
+
+        if (error instanceof Error) {
+          setErrorMessage(error.message);
+          throw error;
+        }
+
+        const fallbackMessage = "No se pudo editar el show.";
+        setErrorMessage(fallbackMessage);
+        throw new Error(fallbackMessage);
+      } finally {
+        setUpdating(false);
+      }
+    },
+    [agrupacionId]
+  );
+
+  const deleteShows = useCallback(
+    async (ids: string[]) => {
+      if (!agrupacionId) {
+        throw new Error("No se encontró la agrupación.");
+      }
+
+      try {
+        setDeleting(true);
+        setErrorMessage("");
+
+        await softDeleteShows(agrupacionId, ids);
+
+        setShows((current) => current.filter((item) => !ids.includes(item.id)));
+      } catch (error) {
+        console.error(error);
+
+        if (error instanceof Error) {
+          setErrorMessage(error.message);
+          throw error;
+        }
+
+        const fallbackMessage = "No se pudieron eliminar los shows.";
+        setErrorMessage(fallbackMessage);
+        throw new Error(fallbackMessage);
+      } finally {
+        setDeleting(false);
+      }
+    },
+    [agrupacionId]
+  );
+
   useEffect(() => {
     loadShows();
   }, [loadShows]);
@@ -81,8 +155,12 @@ export function useShows(agrupacionId?: string) {
     shows,
     loading,
     creating,
+    updating,
+    deleting,
     errorMessage,
     loadShows,
     createNewShow,
+    updateShowNombre,
+    deleteShows,
   };
 }

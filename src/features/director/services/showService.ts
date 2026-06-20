@@ -4,6 +4,7 @@ import {
     getDocs,
     query,
     setDoc,
+    updateDoc,
     where,
 } from "firebase/firestore";
 
@@ -48,5 +49,43 @@ export async function getShowsByAgrupacion(
     return snapshot.docs
         .map((document) => document.data() as Show)
         .sort((a, b) => a.nombre.localeCompare(b.nombre));
+}
+
+type UpdateShowParams = {
+    nombre: string;
+    fecha?: string;
+};
+
+export async function updateShow(
+    agrupacionId: string,
+    id: string,
+    { nombre, fecha }: UpdateShowParams
+): Promise<void> {
+    const nombreNormalizado = nombre.trim();
+    const fechaNormalizada = fecha?.trim() || null;
+
+    if (!nombreNormalizado) {
+        throw new Error("El nombre del show es obligatorio.");
+    }
+
+    const docRef = doc(db, "agrupaciones", agrupacionId, "shows", id);
+
+    await updateDoc(docRef, {
+        nombre: nombreNormalizado,
+        fecha: fechaNormalizada,
+    });
+}
+
+export async function softDeleteShows(
+    agrupacionId: string,
+    ids: string[]
+): Promise<void> {
+    await Promise.all(
+        ids.map((id) =>
+            updateDoc(doc(db, "agrupaciones", agrupacionId, "shows", id), {
+                active: false,
+            })
+        )
+    );
 }
 
