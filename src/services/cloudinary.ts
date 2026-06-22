@@ -1,42 +1,54 @@
+import type { InstrumentPdf } from "../features/shows/types";
+
 const CLOUD_NAME = "dgo0osrkz";
 const UPLOAD_PRESET = "lyra_setlists";
-
-const UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`;
 
 export type CloudinaryUploadResult = {
   publicId: string;
   url: string;
+  folder: string;
 };
 
-export async function uploadPdfToCloudinary(
-  uri: string,
-  fileName: string
-): Promise<CloudinaryUploadResult> {
+type UploadPdfParams = {
+  uri: string;
+  fileName: string;
+  folder: string;
+};
+
+
+export async function uploadPdfToCloudinary({
+  uri,
+  fileName,
+  folder,
+}: UploadPdfParams): Promise<InstrumentPdf> {
   const formData = new FormData();
 
   formData.append("file", {
     uri,
     name: fileName,
     type: "application/pdf",
-  } as unknown as Blob);
-  formData.append("upload_preset", UPLOAD_PRESET);
-  formData.append("resource_type", "auto");
+  } as any);
 
-  const response = await fetch(UPLOAD_URL, {
-    method: "POST",
-    body: formData,
-  });
+  formData.append("upload_preset", UPLOAD_PRESET);
+  formData.append("folder", folder);
+
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
 
   const data = await response.json();
 
   if (!response.ok) {
-    const message =
-      data?.error?.message ?? "No se pudo subir el archivo a Cloudinary.";
-    throw new Error(message);
+    throw new Error(data.error?.message ?? "No se pudo subir el PDF.");
   }
 
   return {
-    publicId: data.public_id,
+    nombre: fileName,
     url: data.secure_url,
+    publicId: data.public_id,
   };
 }

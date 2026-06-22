@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 
-import ShowsScreen from "../../../src/features/director/screens/ShowsScreen";
+import ShowsScreen from "../../../../src/features/director/screens/ShowsScreen";
 
 export default function ShowsRoute() {
   return (
