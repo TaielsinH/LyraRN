@@ -7,6 +7,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { db } from "../../../services/firebase";
@@ -113,4 +114,17 @@ export async function createSetlist({
   const snapshot = await getDoc(docRef);
 
   return mapSetlist(snapshot.id, snapshot.data(), ownerId);
+}
+
+export async function softDeleteSetlists(
+  ownerId: string,
+  ids: string[]
+): Promise<void> {
+  await Promise.all(
+    ids.map((id) =>
+      updateDoc(doc(db, "usuarios", ownerId, "setlists", id), {
+        isActive: false,
+      })
+    )
+  );
 }

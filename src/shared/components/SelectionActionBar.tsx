@@ -6,7 +6,7 @@ import { styles } from "./SelectionActionBar.styles";
 type SelectionActionBarProps = {
   selectedCount: number;
   onCancel: () => void;
-  onEdit: () => void;
+  onEdit?: () => void;
   onDelete: () => void;
   deleting?: boolean;
 };
@@ -32,14 +32,16 @@ export function SelectionActionBar({
       </Text>
 
       <View style={styles.actions}>
-        <Pressable
-          onPress={onEdit}
-          disabled={!canEdit}
-          style={[styles.actionButton, !canEdit && styles.actionButtonDisabled]}
-          hitSlop={8}
-        >
-          <Ionicons name="pencil" size={20} color={canEdit ? "#6b7280" : "#d1d5db"} />
-        </Pressable>
+        {onEdit ? (
+          <Pressable
+            onPress={onEdit}
+            disabled={!canEdit}
+            style={[styles.actionButton, !canEdit && styles.actionButtonDisabled]}
+            hitSlop={8}
+          >
+            <Ionicons name="pencil" size={20} color={canEdit ? "#6b7280" : "#d1d5db"} />
+          </Pressable>
+        ) : null}
 
         <Pressable
           onPress={onDelete}

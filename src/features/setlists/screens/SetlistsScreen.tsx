@@ -2,6 +2,7 @@ import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Pressable,
   RefreshControl,
@@ -10,9 +11,10 @@ import {
 } from "react-native";
 import { useAuth } from "../../auth/context/AuthContext";
 import { logout } from "../../auth/services/authService";
+import { SelectionActionBar } from "../../../shared/components/SelectionActionBar";
 import { SetlistCard } from "../components/SetlistCard";
 import { SetlistFloatingActionMenu } from "../components/SetlistFloatingActionMenu";
-import { getUserSetlists } from "../services/setlistService";
+import { getUserSetlists, softDeleteSetlists } from "../services/setlistService";
 import type { Setlist } from "../types";
 import { styles } from "./SetlistsScreen.styles";
 
@@ -24,6 +26,11 @@ export default function SetlistsScreen() {
   const [logoutLoading, setLogoutLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
+
+  const selectionMode = selectedIds.size > 0;
 
   const loadSetlists = useCallback(async () => {
     if (!user) {
@@ -73,6 +80,80 @@ export default function SetlistsScreen() {
     }
   }
 
+  function exitSelectionMode() {
+    setSelectedIds(new Set());
+  }
+
+  function toggleSelected(id: string) {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function handleLongPress(setlist: Setlist) {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      next.add(setlist.id);
+      return next;
+    });
+  }
+
+  function handleCardPress(setlist: Setlist) {
+    if (selectionMode) {
+      toggleSelected(setlist.id);
+      return;
+    }
+
+    router.push({
+      pathname: "/setlists/[id]",
+      params: {
+        id: setlist.id,
+      },
+    });
+  }
+
+  function handleDeletePress() {
+    if (!user) return;
+
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    Alert.alert(
+      ids.length === 1 ? "Eliminar setlist" : "Eliminar setlists",
+      ids.length === 1
+        ? "¿Querés eliminar el setlist seleccionado?"
+        : `¿Querés eliminar los ${ids.length} setlists seleccionados?`,
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              setDeleting(true);
+              await softDeleteSetlists(user.uid, ids);
+              setSetlists((current) =>
+                current.filter((item) => !ids.includes(item.id))
+              );
+              exitSelectionMode();
+            } catch (error) {
+              console.log("Error eliminando setlists:", error);
+              setErrorMessage("No se pudieron eliminar los setlists.");
+            } finally {
+              setDeleting(false);
+            }
+          },
+        },
+      ]
+    );
+  }
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -84,24 +165,33 @@ export default function SetlistsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Setlists</Text>
+      {selectionMode ? (
+        <SelectionActionBar
+          selectedCount={selectedIds.size}
+          onCancel={exitSelectionMode}
+          onDelete={handleDeletePress}
+          deleting={deleting}
+        />
+      ) : (
+        <View style={styles.header}>
+          <Text style={styles.title}>Setlists</Text>
 
-        <Pressable
-          disabled={logoutLoading}
-          onPress={handleLogout}
-          style={({ pressed }) => [
-            styles.logoutButton,
-            (pressed || logoutLoading) && styles.logoutButtonPressed,
-          ]}
-        >
-          {logoutLoading ? (
-            <ActivityIndicator color="#ffffff" size="small" />
-          ) : (
-            <Text style={styles.logoutButtonText}>Cerrar sesion</Text>
-          )}
-        </Pressable>
-      </View>
+          <Pressable
+            disabled={logoutLoading}
+            onPress={handleLogout}
+            style={({ pressed }) => [
+              styles.logoutButton,
+              (pressed || logoutLoading) && styles.logoutButtonPressed,
+            ]}
+          >
+            {logoutLoading ? (
+              <ActivityIndicator color="#ffffff" size="small" />
+            ) : (
+              <Text style={styles.logoutButtonText}>Cerrar sesion</Text>
+            )}
+          </Pressable>
+        </View>
+      )}
 
       {errorMessage ? (
         <Text style={styles.error}>{errorMessage}</Text>
@@ -110,17 +200,14 @@ export default function SetlistsScreen() {
       <FlatList
         data={setlists}
         keyExtractor={(item) => item.id}
+        extraData={selectedIds}
         renderItem={({ item }) => (
           <SetlistCard
             setlist={item}
-            onPress={() => {
-              router.push({
-                pathname: "/setlists/[id]",
-                params: {
-                  id: item.id,
-                },
-              });
-            }}
+            selected={selectedIds.has(item.id)}
+            selectionMode={selectionMode}
+            onPress={() => handleCardPress(item)}
+            onLongPress={() => handleLongPress(item)}
           />
         )}
         refreshControl={
@@ -131,15 +218,16 @@ export default function SetlistsScreen() {
         }
         contentContainerStyle={styles.listContent}
       />
-      <SetlistFloatingActionMenu
-        onCreatePress={() => {
-          router.push("/setlists/create");
-        }}
-        onCodePress={() => {
-          console.log("Generar o compartir codigo");
-        }}
-      />
+      {!selectionMode ? (
+        <SetlistFloatingActionMenu
+          onCreatePress={() => {
+            router.push("/setlists/create");
+          }}
+          onCodePress={() => {
+            console.log("Generar o compartir codigo");
+          }}
+        />
+      ) : null}
     </View>
   );
 }
-
