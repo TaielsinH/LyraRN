@@ -14,6 +14,9 @@ export const styles = StyleSheet.create({
   webview: {
     flex: 1,
   },
+  image: {
+    flex: 1,
+  },
   loadingOverlay: {
     position: "absolute",
     zIndex: 1,
