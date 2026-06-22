@@ -187,7 +187,12 @@ export default function CreateSetlistScreen() {
 
       const partituras = await Promise.all(
         pdfs.map(async (pdf) => {
-          const uploaded = await uploadPdfToCloudinary(pdf.uri, pdf.name);
+          const uploaded = await uploadPdfToCloudinary({
+            uri: pdf.uri,
+            fileName: pdf.name,
+            folder: `usuarios/${user.uid}/partituras`,
+          });
+
           return {
             nombre: pdf.name,
             publicId: uploaded.publicId,

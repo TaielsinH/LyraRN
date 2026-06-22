@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -24,8 +24,8 @@ export default function ShowsScreen() {
     nombre?: string;
   }>();
 
-  const agrupacionId = params.agrupacionId;
-  const agrupacionNombre = params.nombre ?? "Agrupación";
+  const agrupacionId = getParam(params.agrupacionId);
+  const agrupacionNombre = getParam(params.nombre) || "Agrupación";
 
   const [dialogVisible, setDialogVisible] = useState(false);
 
@@ -46,6 +46,10 @@ export default function ShowsScreen() {
     updateShowNombre,
     deleteShows,
   } = useShows(agrupacionId);
+
+  function getParam(value: string | string[] | undefined) {
+    return Array.isArray(value) ? value[0] : value ?? "";
+  }
 
   async function handleCreateShow(nombre: string, fecha?: string) {
     await createNewShow(nombre, fecha);
@@ -76,10 +80,24 @@ export default function ShowsScreen() {
   }
 
   function handleCardPress(show: Show) {
-    if (selectionMode) {
-      toggleSelected(show.id);
-    }
+  if (selectionMode) {
+    toggleSelected(show.id);
+    return;
   }
+
+  if (!agrupacionId) {
+    Alert.alert("Error", "No se encontró la agrupación.");
+    return;
+  }
+
+  router.push({
+    pathname: "/agrupaciones/[agrupacionId]/shows/[showId]",
+    params: {
+      agrupacionId,
+      showId: show.id,
+    },
+  });
+}
 
   function handleEditPress() {
     if (selectedIds.size !== 1) return;
