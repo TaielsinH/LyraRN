@@ -186,6 +186,7 @@ export default function SetlistsScreen() {
 
       <FlatList
         data={filteredSetlists}
+        style={styles.list}
         keyExtractor={(item) => item.id}
         extraData={selectedIds}
         renderItem={({ item }) => (

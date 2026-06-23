@@ -1,6 +1,8 @@
 import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
 import * as Location from "expo-location";
+import * as Print from "expo-print";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -37,6 +39,7 @@ export default function CreateSetlistScreen() {
 
   const [isCameraModalVisible, setIsCameraModalVisible] = useState(false);
   const [localPhotosQueue, setLocalPhotosQueue] = useState<string[]>([]);
+  const [convertingToPdf, setConvertingToPdf] = useState(false);
 
   async function handlePickPdf() {
     try {
@@ -110,23 +113,95 @@ export default function CreateSetlistScreen() {
     }
   }
 
-  function handleSaveCapturedBatch() {
+  async function getMimeTypeFromUri(uri: string): Promise<string> {
+    const lower = uri.toLowerCase();
+    if (lower.endsWith(".png")) return "image/png";
+    if (lower.endsWith(".webp")) return "image/webp";
+    return "image/jpeg";
+  }
+
+  async function buildPdfHtmlFromPhotos(photoUris: string[]): Promise<string> {
+    const pagesHtml = await Promise.all(
+      photoUris.map(async (uri) => {
+        const base64 = await FileSystem.readAsStringAsync(uri, {
+          encoding: "base64",
+        });
+        const mime = await getMimeTypeFromUri(uri);
+
+        return `
+          <div class="page">
+            <img src="data:${mime};base64,${base64}" />
+          </div>
+        `;
+      })
+    );
+
+    return `
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            .page {
+              width: 100%;
+              height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              page-break-after: always;
+            }
+            .page img {
+              max-width: 100%;
+              max-height: 100%;
+              object-fit: contain;
+            }
+          </style>
+        </head>
+        <body>
+          ${pagesHtml.join("\n")}
+        </body>
+      </html>
+    `;
+  }
+
+  async function handleSaveCapturedBatch() {
     if (localPhotosQueue.length === 0) {
       Alert.alert("Cola vacia", "Saca una foto para comenzar a crear el PDF.");
       return;
     }
 
     const totalPages = localPhotosQueue.length;
-    
-    const singleCombinedPdf: LocalPdf = {
-      name: `Partitura (${totalPages} ${totalPages === 1 ? 'pág' : 'págs'})`,
-      uri: localPhotosQueue[0], 
-      size: 1024 * 500 * totalPages,
-      mimeType: "application/pdf", 
-    };
 
-    setPdfs((currentPdfs) => [...currentPdfs, singleCombinedPdf]);
-    setIsCameraModalVisible(false); 
+    try {
+      setConvertingToPdf(true);
+
+      const html = await buildPdfHtmlFromPhotos(localPhotosQueue);
+      const { uri: generatedPdfUri } = await Print.printToFileAsync({
+        html,
+        base64: false,
+      });
+
+      const finalPdfUri = generatedPdfUri;
+      const fileInfo = await FileSystem.getInfoAsync(finalPdfUri);
+
+      const realPdf: LocalPdf = {
+        name: `Partitura (${totalPages} ${totalPages === 1 ? "pág" : "págs"}).pdf`,
+        uri: finalPdfUri,
+        size: fileInfo.exists ? fileInfo.size : undefined,
+        mimeType: "application/pdf",
+      };
+
+      setPdfs((currentPdfs) => [...currentPdfs, realPdf]);
+      setIsCameraModalVisible(false);
+    } catch (error) {
+      console.log("Error generando el PDF desde las fotos:", error);
+      Alert.alert(
+        "Error",
+        "No se pudo convertir las fotos en PDF. Probá de nuevo."
+      );
+    } finally {
+      setConvertingToPdf(false);
+    }
   }
 
   async function handleUseCurrentLocation() {
@@ -393,12 +468,24 @@ export default function CreateSetlistScreen() {
           </View>
 
           <View style={styles.modalFooter}>
-            <Pressable onPress={handleCapturePage} style={styles.captureButton}>
+            <Pressable
+              onPress={handleCapturePage}
+              style={styles.captureButton}
+              disabled={convertingToPdf}
+            >
               <Text style={styles.modalButtonText}>Tomar Foto</Text>
             </Pressable>
 
-            <Pressable onPress={handleSaveCapturedBatch} style={styles.saveButton}>
-              <Text style={styles.modalButtonText}>Guardar</Text>
+            <Pressable
+              onPress={handleSaveCapturedBatch}
+              style={styles.saveButton}
+              disabled={convertingToPdf}
+            >
+              {convertingToPdf ? (
+                <ActivityIndicator color="#ffffff" />
+              ) : (
+                <Text style={styles.modalButtonText}>Guardar</Text>
+              )}
             </Pressable>
           </View>
 

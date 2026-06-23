@@ -37,6 +37,9 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 40,
   },
+  list: {
+    flex: 1,
+  },
   listContent: {
     paddingBottom: 24,
   },
