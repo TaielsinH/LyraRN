@@ -1,3 +1,3 @@
-import ShowsScreen from "../../src/features/director/screens/ShowsScreen";
+import { ShowSetlistsSuscriptosScreen } from "../../src/features/shows/screens/ShowSetlistsSuscriptosScreen";
 
-export default ShowsScreen;
+export default ShowSetlistsSuscriptosScreen;

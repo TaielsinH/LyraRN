@@ -39,6 +39,12 @@ export default function RootLayout() {
             name="login"
             options={{ headerShown: false }}
           />
+           <Stack.Screen
+              name="show-setlist-reader"
+              options={{
+                title: "Setlist",
+              }}
+            />
         </Stack>
       </AuthProvider>
     </GestureHandlerRootView> 
