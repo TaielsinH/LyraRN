@@ -19,28 +19,13 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     flexDirection: "row",
     gap: 12,
-    justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 12,
+  },
+  hamburgerButton: {
+    padding: 4,
   },
   title: {
-    fontSize: 28,
-    fontWeight: "700",
-  },
-  logoutButton: {
-    alignItems: "center",
-    backgroundColor: "#dc2626",
-    borderRadius: 8,
-    justifyContent: "center",
-    minHeight: 40,
-    minWidth: 118,
-    paddingHorizontal: 14,
-  },
-  logoutButtonPressed: {
-    opacity: 0.75,
-  },
-  logoutButtonText: {
-    color: "#ffffff",
-    fontSize: 14,
+    fontSize: 22,
     fontWeight: "700",
   },
   error: {

@@ -1,5 +1,6 @@
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -9,9 +10,12 @@ import {
   Text,
   View,
 } from "react-native";
-import { useAuth } from "../../auth/context/AuthContext";
-import { logout } from "../../auth/services/authService";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { HamburgerMenu } from "../../../shared/components/HamburgerMenu";
+import { SearchBar } from "../../../shared/components/SearchBar";
 import { SelectionActionBar } from "../../../shared/components/SelectionActionBar";
+import { useHamburgerMenu } from "../../../shared/hooks/useHamburgerMenu";
+import { useAuth } from "../../auth/context/AuthContext";
 import { SetlistCard } from "../components/SetlistCard";
 import { SetlistFloatingActionMenu } from "../components/SetlistFloatingActionMenu";
 import { getUserSetlists, softDeleteSetlists } from "../services/setlistService";
@@ -20,17 +24,24 @@ import { styles } from "./SetlistsScreen.styles";
 
 export default function SetlistsScreen() {
   const { user } = useAuth();
+  const { menuVisible, openMenu, closeMenu } = useHamburgerMenu();
 
   const [setlists, setSetlists] = useState<Setlist[]>([]);
   const [loading, setLoading] = useState(true);
-  const [logoutLoading, setLogoutLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
 
   const selectionMode = selectedIds.size > 0;
+
+  const filteredSetlists = useMemo(() => {
+    if (!searchQuery.trim()) return setlists;
+    const q = searchQuery.toLowerCase();
+    return setlists.filter((s) => s.titulo?.toLowerCase().includes(q));
+  }, [setlists, searchQuery]);
 
   const loadSetlists = useCallback(async () => {
     if (!user) {
@@ -42,9 +53,7 @@ export default function SetlistsScreen() {
 
     try {
       setErrorMessage("");
-
       const result = await getUserSetlists(user.uid);
-
       setSetlists(result);
     } catch (error) {
       console.log("Error cargando setlists:", error);
@@ -62,22 +71,6 @@ export default function SetlistsScreen() {
   async function handleRefresh() {
     setRefreshing(true);
     await loadSetlists();
-  }
-
-  async function handleLogout() {
-    try {
-      setLogoutLoading(true);
-      setErrorMessage("");
-
-      await logout();
-
-      router.replace("/login");
-    } catch (error) {
-      console.log("Error cerrando sesion:", error);
-      setErrorMessage("No se pudo cerrar sesion.");
-    } finally {
-      setLogoutLoading(false);
-    }
   }
 
   function exitSelectionMode() {
@@ -112,9 +105,7 @@ export default function SetlistsScreen() {
 
     router.push({
       pathname: "/setlists/[id]",
-      params: {
-        id: setlist.id,
-      },
+      params: { id: setlist.id },
     });
   }
 
@@ -156,15 +147,15 @@ export default function SetlistsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
+      <SafeAreaView style={styles.center}>
         <ActivityIndicator />
         <Text style={styles.loadingText}>Cargando setlists...</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {selectionMode ? (
         <SelectionActionBar
           selectedCount={selectedIds.size}
@@ -174,23 +165,19 @@ export default function SetlistsScreen() {
         />
       ) : (
         <View style={styles.header}>
-          <Text style={styles.title}>Setlists</Text>
-
-          <Pressable
-            disabled={logoutLoading}
-            onPress={handleLogout}
-            style={({ pressed }) => [
-              styles.logoutButton,
-              (pressed || logoutLoading) && styles.logoutButtonPressed,
-            ]}
-          >
-            {logoutLoading ? (
-              <ActivityIndicator color="#ffffff" size="small" />
-            ) : (
-              <Text style={styles.logoutButtonText}>Cerrar sesion</Text>
-            )}
+          <Pressable onPress={openMenu} style={styles.hamburgerButton} hitSlop={8}>
+            <Ionicons name="menu" size={26} color="#111827" />
           </Pressable>
+          <Text style={styles.title}>Mis Setlists</Text>
         </View>
+      )}
+
+      {!selectionMode && (
+        <SearchBar
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Buscar setlist..."
+        />
       )}
 
       {errorMessage ? (
@@ -198,7 +185,7 @@ export default function SetlistsScreen() {
       ) : null}
 
       <FlatList
-        data={setlists}
+        data={filteredSetlists}
         keyExtractor={(item) => item.id}
         extraData={selectedIds}
         renderItem={({ item }) => (
@@ -214,10 +201,15 @@ export default function SetlistsScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
         }
         ListEmptyComponent={
-          <Text style={styles.empty}>No hay setlists cargados.</Text>
+          <Text style={styles.empty}>
+            {searchQuery
+              ? "No se encontraron setlists."
+              : "No hay setlists cargados."}
+          </Text>
         }
         contentContainerStyle={styles.listContent}
       />
+
       {!selectionMode ? (
         <SetlistFloatingActionMenu
           onCreatePress={() => {
@@ -228,6 +220,8 @@ export default function SetlistsScreen() {
           }}
         />
       ) : null}
-    </View>
+
+      <HamburgerMenu visible={menuVisible} onClose={closeMenu} />
+    </SafeAreaView>
   );
 }

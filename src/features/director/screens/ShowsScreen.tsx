@@ -8,26 +8,30 @@ import {
   Text,
   View,
 } from "react-native";
-
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { FloatingActionButton } from "../../../shared/components/FloatingActionButton";
 import { SelectionActionBar } from "../../../shared/components/SelectionActionBar";
 import { SelectionCheckbox } from "../../../shared/components/SelectionCheckbox";
+import { HamburgerMenu } from "../../../shared/components/HamburgerMenu";
+import { useHamburgerMenu } from "../../../shared/hooks/useHamburgerMenu";
 import { CreateShowDialog } from "../components/CreateShowDialog";
 import { EditShowDialog } from "../components/EditShowDialog";
 import { useShows } from "../hooks/useShows";
 import type { Show } from "../types";
 import { styles } from "./ShowsScreen.styles";
 
-export default function ShowsScreen() {
+export default function ShowsScreen({ showHamburger = true }: { showHamburger?: boolean }) {
   const params = useLocalSearchParams<{
     agrupacionId?: string;
     nombre?: string;
   }>();
 
   const agrupacionId = getParam(params.agrupacionId);
-  const agrupacionNombre = getParam(params.nombre) || "Agrupación";
+  const agrupacionNombre = getParam(params.nombre) || "Shows";
 
   const [dialogVisible, setDialogVisible] = useState(false);
+  const { menuVisible, openMenu, closeMenu } = useHamburgerMenu();
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editDialogVisible, setEditDialogVisible] = useState(false);
@@ -80,40 +84,33 @@ export default function ShowsScreen() {
   }
 
   function handleCardPress(show: Show) {
-  if (selectionMode) {
-    toggleSelected(show.id);
-    return;
-  }
+    if (selectionMode) {
+      toggleSelected(show.id);
+      return;
+    }
 
-  if (!agrupacionId) {
-    Alert.alert("Error", "No se encontró la agrupación.");
-    return;
-  }
+    if (!agrupacionId) {
+      Alert.alert("Error", "No se encontró la agrupación.");
+      return;
+    }
 
-  router.push({
-    pathname: "/agrupaciones/[agrupacionId]/shows/[showId]",
-    params: {
-      agrupacionId,
-      showId: show.id,
-    },
-  });
-}
+    router.push({
+      pathname: "/agrupaciones/[agrupacionId]/shows/[showId]",
+      params: { agrupacionId, showId: show.id },
+    });
+  }
 
   function handleEditPress() {
     if (selectedIds.size !== 1) return;
-
     const [id] = Array.from(selectedIds);
     const show = shows.find((item) => item.id === id) ?? null;
-
     if (!show) return;
-
     setEditingShow(show);
     setEditDialogVisible(true);
   }
 
   async function handleSaveEdit(nombre: string, fecha?: string) {
     if (!editingShow) return;
-
     await updateShowNombre(editingShow.id, nombre, fecha);
     exitSelectionMode();
   }
@@ -141,9 +138,7 @@ export default function ShowsScreen() {
             try {
               await deleteShows(ids);
               exitSelectionMode();
-            } catch {
-
-            }
+            } catch {}
           },
         },
       ]
@@ -160,15 +155,12 @@ export default function ShowsScreen() {
         onLongPress={() => handleLongPress(item)}
       >
         <Text style={styles.cardTitle}>{item.nombre}</Text>
-
         <Text style={styles.cardSubtitle}>
           {item.fecha ? `Fecha: ${item.fecha}` : "Sin fecha definida"}
         </Text>
-
         <Text style={styles.cardMeta}>
           {item.setlistMaster.length} obras en setlist
         </Text>
-
         {selectionMode ? (
           <SelectionCheckbox selected={selected} style={styles.checkbox} />
         ) : null}
@@ -176,8 +168,10 @@ export default function ShowsScreen() {
     );
   }
 
+  const Container = showHamburger ? SafeAreaView : View;
+
   return (
-    <View style={styles.container}>
+    <Container style={styles.container}>
       {selectionMode ? (
         <SelectionActionBar
           selectedCount={selectedIds.size}
@@ -187,9 +181,14 @@ export default function ShowsScreen() {
           deleting={deleting}
         />
       ) : (
-        <View style={styles.header}>
-          <Text style={styles.title}>{agrupacionNombre}</Text>
-        </View>
+        showHamburger ? (
+          <View style={styles.header}>
+            <Pressable onPress={openMenu} style={styles.hamburgerButton} hitSlop={8}>
+              <Ionicons name="menu" size={26} color="#111827" />
+            </Pressable>
+            <Text style={styles.title}>{agrupacionNombre}</Text>
+          </View>
+        ) : null
       )}
 
       {loading ? (
@@ -203,7 +202,9 @@ export default function ShowsScreen() {
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <Text style={styles.emptyText}>
-              Todavía no creaste shows para esta agrupación.
+              {agrupacionId
+                ? "Todavía no creaste shows para esta agrupación."
+                : "Seleccioná una agrupación desde el menú para ver sus shows."}
             </Text>
           }
         />
@@ -231,6 +232,8 @@ export default function ShowsScreen() {
         onClose={handleCloseEditDialog}
         onSave={handleSaveEdit}
       />
-    </View>
+
+      <HamburgerMenu visible={menuVisible} onClose={closeMenu} />
+    </Container>
   );
 }

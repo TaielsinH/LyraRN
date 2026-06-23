@@ -7,11 +7,14 @@ import {
   Text,
   View,
 } from "react-native";
-
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { FloatingActionButton } from "../../../shared/components/FloatingActionButton";
 import { SelectionActionBar } from "../../../shared/components/SelectionActionBar";
 import { SelectionCheckbox } from "../../../shared/components/SelectionCheckbox";
+import { HamburgerMenu } from "../../../shared/components/HamburgerMenu";
+import { useHamburgerMenu } from "../../../shared/hooks/useHamburgerMenu";
 import { useAuth } from "../../auth/context/AuthContext";
 import { CreateAgrupacionDialog } from "../components/CreateAgrupacionDialog";
 import { EditAgrupacionDialog } from "../components/EditAgrupacionDialog";
@@ -23,12 +26,11 @@ export default function DirectorScreen() {
   const { user } = useAuth();
   const [dialogVisible, setDialogVisible] = useState(false);
   const router = useRouter();
+  const { menuVisible, openMenu, closeMenu } = useHamburgerMenu();
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editDialogVisible, setEditDialogVisible] = useState(false);
-  const [editingAgrupacion, setEditingAgrupacion] = useState<Agrupacion | null>(
-    null
-  );
+  const [editingAgrupacion, setEditingAgrupacion] = useState<Agrupacion | null>(null);
 
   const selectionMode = selectedIds.size > 0;
 
@@ -77,35 +79,27 @@ export default function DirectorScreen() {
       toggleSelected(agrupacion.id);
       return;
     }
-
     handleAgrupacionPress(agrupacion);
   }
 
   function handleAgrupacionPress(agrupacion: Agrupacion) {
     router.push({
       pathname: "/agrupaciones/[agrupacionId]/shows",
-      params: {
-        agrupacionId: agrupacion.id,
-        nombre: agrupacion.nombre,
-      },
+      params: { agrupacionId: agrupacion.id, nombre: agrupacion.nombre },
     });
   }
 
   function handleEditPress() {
     if (selectedIds.size !== 1) return;
-
     const [id] = Array.from(selectedIds);
     const agrupacion = agrupaciones.find((item) => item.id === id) ?? null;
-
     if (!agrupacion) return;
-
     setEditingAgrupacion(agrupacion);
     setEditDialogVisible(true);
   }
 
   async function handleSaveEdit(nombre: string) {
     if (!editingAgrupacion) return;
-
     await updateAgrupacionNombre(editingAgrupacion.id, nombre);
     exitSelectionMode();
   }
@@ -133,9 +127,7 @@ export default function DirectorScreen() {
             try {
               await deleteAgrupaciones(ids);
               exitSelectionMode();
-            } catch {
-      
-            }
+            } catch {}
           },
         },
       ]
@@ -152,7 +144,6 @@ export default function DirectorScreen() {
         onLongPress={() => handleLongPress(item)}
       >
         <Text style={styles.cardTitle}>{item.nombre}</Text>
-
         {selectionMode ? (
           <SelectionCheckbox selected={selected} style={styles.checkbox} />
         ) : null}
@@ -161,7 +152,7 @@ export default function DirectorScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       {selectionMode ? (
         <SelectionActionBar
           selectedCount={selectedIds.size}
@@ -171,7 +162,12 @@ export default function DirectorScreen() {
           deleting={deleting}
         />
       ) : (
-        <Text style={styles.title}>Panel de director</Text>
+        <View style={styles.headerRow}>
+          <Pressable onPress={openMenu} style={styles.hamburgerButton} hitSlop={8}>
+            <Ionicons name="menu" size={26} color="#111827" />
+          </Pressable>
+          <Text style={styles.title}>Panel de director</Text>
+        </View>
       )}
 
       {loading ? (
@@ -213,6 +209,8 @@ export default function DirectorScreen() {
         onClose={handleCloseEditDialog}
         onSave={handleSaveEdit}
       />
-    </View>
+
+      <HamburgerMenu visible={menuVisible} onClose={closeMenu} />
+    </SafeAreaView>
   );
 }
