@@ -7,7 +7,13 @@ export const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
     marginBottom: 20,
+  },
+  hamburgerButton: {
+    padding: 4,
   },
   backText: {
     color: "#5b3f96",
@@ -16,7 +22,7 @@ export const styles = StyleSheet.create({
     marginBottom: 12,
   },
   title: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: "800",
   },
   subtitle: {

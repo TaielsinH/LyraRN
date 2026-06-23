@@ -6,10 +6,18 @@ export const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#F8F8F8",
   },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
     marginBottom: 16,
+  },
+  hamburgerButton: {
+    padding: 4,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "700",
   },
   listContent: {
     gap: 12,
