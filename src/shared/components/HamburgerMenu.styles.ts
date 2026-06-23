@@ -1,16 +1,10 @@
-import { Dimensions, StyleSheet } from "react-native";
-
-const DRAWER_WIDTH = 280;
-const SCREEN_HEIGHT = Dimensions.get("window").height;
+import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   overlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 1000,
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 9999,
+    elevation: 9999,
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
@@ -23,8 +17,9 @@ export const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     left: 0,
-    width: DRAWER_WIDTH,
-    height: SCREEN_HEIGHT,
+    bottom: 0,
+    width: "78%",
+    maxWidth: 320,
     backgroundColor: "#ffffff",
     shadowColor: "#000",
     shadowOffset: { width: 4, height: 0 },
@@ -85,7 +80,6 @@ export const styles = StyleSheet.create({
     borderTopColor: "#e5e7eb",
     paddingVertical: 20,
     paddingHorizontal: 24,
-    marginBottom: 30,
   },
   logoutText: {
     color: "#dc2626",

@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Dimensions,
+  Modal,
   Pressable,
   ScrollView,
   Text,
@@ -19,7 +21,7 @@ type Props = {
   onClose: () => void;
 };
 
-const DRAWER_WIDTH = 280;
+const SCREEN_WIDTH = Dimensions.get("window").width;
 const ANIMATION_DURATION = 240;
 
 const AGRUPACION_COLORS = [
@@ -37,13 +39,13 @@ export function HamburgerMenu({ visible, onClose }: Props) {
   const { user } = useAuth();
   const { agrupaciones } = useAgrupaciones(user?.uid);
 
-  const translateX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
+  const [isModalRendered, setIsModalRendered] = useState(false);
+  const translateX = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const backdropOpacity = useRef(new Animated.Value(0)).current;
-  const mounted = useRef(false);
 
   useEffect(() => {
     if (visible) {
-      mounted.current = true;
+      setIsModalRendered(true);
       Animated.parallel([
         Animated.timing(translateX, {
           toValue: 0,
@@ -59,7 +61,7 @@ export function HamburgerMenu({ visible, onClose }: Props) {
     } else {
       Animated.parallel([
         Animated.timing(translateX, {
-          toValue: -DRAWER_WIDTH,
+          toValue: -SCREEN_WIDTH,
           duration: ANIMATION_DURATION,
           useNativeDriver: true,
         }),
@@ -68,7 +70,9 @@ export function HamburgerMenu({ visible, onClose }: Props) {
           duration: ANIMATION_DURATION,
           useNativeDriver: true,
         }),
-      ]).start();
+      ]).start(() => {
+        setIsModalRendered(false);
+      });
     }
   }, [visible]);
 
@@ -101,79 +105,87 @@ export function HamburgerMenu({ visible, onClose }: Props) {
   }
 
   return (
-    <View style={styles.overlay} pointerEvents={visible ? "auto" : "none"}>
-      {/* Backdrop */}
-      <Animated.View
-        style={[styles.backdrop, { opacity: backdropOpacity }]}
-        pointerEvents={visible ? "auto" : "none"}
-      >
-        <Pressable style={styles.backdropPressable} onPress={onClose} />
-      </Animated.View>
-
-      {/* Drawer */}
-      <Animated.View style={[styles.drawer, { transform: [{ translateX }] }]}>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
+    <Modal
+      visible={isModalRendered}
+      transparent
+      animationType="none"
+      statusBarTranslucent
+      onRequestClose={onClose}
+    >
+      <View style={styles.overlay} pointerEvents={visible ? "auto" : "none"}>
+        {/* bd */}
+        <Animated.View
+          style={[styles.backdrop, { opacity: backdropOpacity }]}
+          pointerEvents={visible ? "auto" : "none"}
         >
-          {/* Section: SHOWS */}
-          <Text style={styles.sectionLabel}>SHOWS</Text>
-          <View style={styles.sectionDivider} />
+          <Pressable style={styles.backdropPressable} onPress={onClose} />
+        </Animated.View>
 
-          <TouchableOpacity
-            style={styles.menuItem}
-            onPress={handleShowsPress}
-            activeOpacity={0.6}
+        {/* dw */}
+        <Animated.View style={[styles.drawer, { transform: [{ translateX }] }]}>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
           >
-            <Ionicons name="calendar-outline" size={19} color="#374151" style={styles.menuItemIcon} />
-            <Text style={styles.menuItemText}>Shows</Text>
-          </TouchableOpacity>
+            
+            <Text style={styles.sectionLabel}>SHOWS</Text>
+            <View style={styles.sectionDivider} />
 
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={handleShowsPress}
+              activeOpacity={0.6}
+            >
+              <Ionicons name="calendar-outline" size={19} color="#374151" style={styles.menuItemIcon} />
+              <Text style={styles.menuItemText}>Shows</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={handleSetlistsPress}
+              activeOpacity={0.6}
+            >
+              <Ionicons name="musical-notes-outline" size={19} color="#374151" style={styles.menuItemIcon} />
+              <Text style={styles.menuItemText}>Mis Setlists</Text>
+            </TouchableOpacity>
+
+            {/* DIRECTOR */}
+            {agrupaciones.length > 0 && (
+              <>
+                <Text style={[styles.sectionLabel, styles.sectionLabelSpaced]}>
+                  DIRECTOR
+                </Text>
+                <View style={styles.sectionDivider} />
+
+                {agrupaciones.map((agrupacion, index) => {
+                  const color = AGRUPACION_COLORS[index % AGRUPACION_COLORS.length];
+                  return (
+                    <TouchableOpacity
+                      key={agrupacion.id}
+                      style={styles.menuItem}
+                      onPress={() => handleAgrupacionPress(agrupacion.id, agrupacion.nombre)}
+                      activeOpacity={0.6}
+                    >
+                      <View style={[styles.agrupacionDot, { backgroundColor: color }]} />
+                      <Text style={styles.menuItemText}>{agrupacion.nombre}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </>
+            )}
+          </ScrollView>
+
+          {/* Logout */}
           <TouchableOpacity
-            style={styles.menuItem}
-            onPress={handleSetlistsPress}
-            activeOpacity={0.6}
+            style={styles.logoutButton}
+            onPress={handleLogout}
+            activeOpacity={0.7}
           >
-            <Ionicons name="musical-notes-outline" size={19} color="#374151" style={styles.menuItemIcon} />
-            <Text style={styles.menuItemText}>Mis Setlists</Text>
+            <Text style={styles.logoutText}>Cerrar sesión</Text>
           </TouchableOpacity>
-
-          {/* Section: DIRECTOR */}
-          {agrupaciones.length > 0 && (
-            <>
-              <Text style={[styles.sectionLabel, styles.sectionLabelSpaced]}>
-                DIRECTOR
-              </Text>
-              <View style={styles.sectionDivider} />
-
-              {agrupaciones.map((agrupacion, index) => {
-                const color = AGRUPACION_COLORS[index % AGRUPACION_COLORS.length];
-                return (
-                  <TouchableOpacity
-                    key={agrupacion.id}
-                    style={styles.menuItem}
-                    onPress={() => handleAgrupacionPress(agrupacion.id, agrupacion.nombre)}
-                    activeOpacity={0.6}
-                  >
-                    <View style={[styles.agrupacionDot, { backgroundColor: color }]} />
-                    <Text style={styles.menuItemText}>{agrupacion.nombre}</Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </>
-          )}
-        </ScrollView>
-
-        {/* Logout */}
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.logoutText}>Cerrar sesión</Text>
-        </TouchableOpacity>
-      </Animated.View>
-    </View>
+        </Animated.View>
+      </View>
+    </Modal>
   );
 }
