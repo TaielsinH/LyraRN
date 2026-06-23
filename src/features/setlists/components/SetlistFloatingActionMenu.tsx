@@ -76,16 +76,16 @@ export function SetlistFloatingActionMenu({
     <View style={styles.container} pointerEvents="box-none">
       <Animated.View style={[styles.actionContainer, codeButtonStyle]}>
         <Pressable style={[styles.smallButton, styles.codeButton]} onPress={handleCodePress}>
-          <Ionicons name="share-social-outline" size={24} color="#ffffff" />
+          <Ionicons name="key-outline" size={24} color="#ffffff" />
         </Pressable>
-        <Text style={styles.label}>Code</Text>
+        <Text style={styles.label}>Código</Text>
       </Animated.View>
 
       <Animated.View style={[styles.actionContainer, createButtonStyle]}>
         <Pressable style={[styles.smallButton, styles.createButton]} onPress={handleCreatePress}>
           <Ionicons name="add-circle-outline" size={26} color="#ffffff" />
         </Pressable>
-        <Text style={styles.label}>Create</Text>
+        <Text style={styles.label}>Crear</Text>
       </Animated.View>
 
       <Pressable style={styles.mainButton} onPress={toggleMenu}>

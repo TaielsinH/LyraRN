@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useFocusEffect } from "expo-router";
 
 import { useAuth } from "../../auth/context/AuthContext";
 import { cargarShowSetlistsSuscriptos } from "../services/showSetlistsSuscriptosService";
@@ -43,9 +44,11 @@ export function useShowSetlistsSuscriptos() {
     [user]
   );
 
-  useEffect(() => {
-    loadSetlists();
-  }, [loadSetlists]);
+  useFocusEffect(
+    useCallback(() => {
+      loadSetlists();
+    }, [loadSetlists])
+  );
 
   const refresh = useCallback(() => {
     loadSetlists(true);

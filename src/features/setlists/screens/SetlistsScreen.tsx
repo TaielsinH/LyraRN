@@ -11,7 +11,9 @@ import {
 } from "react-native";
 import { useAuth } from "../../auth/context/AuthContext";
 import { logout } from "../../auth/services/authService";
+import { suscribirseAShowPorCodigo } from "../../shows/services/showSetlistsSuscriptosService";
 import { SelectionActionBar } from "../../../shared/components/SelectionActionBar";
+import { JoinShowByCodeDialog } from "../components/JoinShowByCodeDialog";
 import { SetlistCard } from "../components/SetlistCard";
 import { SetlistFloatingActionMenu } from "../components/SetlistFloatingActionMenu";
 import { getUserSetlists, softDeleteSetlists } from "../services/setlistService";
@@ -29,6 +31,8 @@ export default function SetlistsScreen() {
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [deleting, setDeleting] = useState(false);
+  const [joinDialogVisible, setJoinDialogVisible] = useState(false);
+  const [joiningShow, setJoiningShow] = useState(false);
 
   const selectionMode = selectedIds.size > 0;
 
@@ -154,6 +158,47 @@ export default function SetlistsScreen() {
     );
   }
 
+  function openJoinDialog() {
+    setJoinDialogVisible(true);
+  }
+
+  function closeJoinDialog() {
+    if (joiningShow) return;
+
+    setJoinDialogVisible(false);
+  }
+
+  async function handleJoinShowByCode(codigo: string) {
+    if (!user) {
+      throw new Error("No hay un usuario autenticado.");
+    }
+
+    try {
+      setJoiningShow(true);
+      setErrorMessage("");
+
+      const showSuscripto = await suscribirseAShowPorCodigo(codigo, user.uid);
+
+      setJoinDialogVisible(false);
+
+      Alert.alert(
+        "Show agregado",
+        `${showSuscripto.nombreShow} - ${showSuscripto.nombreInstrumento}`,
+        [
+          { text: "OK" },
+          {
+            text: "Ver shows",
+            onPress: () => {
+              router.push("/shows");
+            },
+          },
+        ]
+      );
+    } finally {
+      setJoiningShow(false);
+    }
+  }
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -223,11 +268,16 @@ export default function SetlistsScreen() {
           onCreatePress={() => {
             router.push("/setlists/create");
           }}
-          onCodePress={() => {
-            console.log("Generar o compartir codigo");
-          }}
+          onCodePress={openJoinDialog}
         />
       ) : null}
+
+      <JoinShowByCodeDialog
+        visible={joinDialogVisible}
+        joining={joiningShow}
+        onClose={closeJoinDialog}
+        onJoin={handleJoinShowByCode}
+      />
     </View>
   );
 }
