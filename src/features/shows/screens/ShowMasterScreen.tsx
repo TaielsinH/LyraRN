@@ -9,6 +9,7 @@ import {
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useAuth } from "../../auth/context/AuthContext";
 import { InstrumentStories } from "../components/InstrumentStories";
 import { SetlistMasterMatrix } from "../components/SetlistMasterMatrix";
 import { useShowMaster } from "../hooks/useShowMaster";
@@ -20,6 +21,7 @@ function getParam(value: string | string[] | undefined) {
 }
 
 export default function ShowMasterScreen() {
+    const { user } = useAuth();
     const params = useLocalSearchParams<{
         agrupacionId?: string;
         showId?: string;
@@ -36,7 +38,7 @@ export default function ShowMasterScreen() {
         addInstrumento,
         addObra,
         reorderObras,
-    } = useShowMaster(agrupacionId, showId);
+    } = useShowMaster(agrupacionId, showId, user?.uid ?? "");
 
     if (loading) {
         return (

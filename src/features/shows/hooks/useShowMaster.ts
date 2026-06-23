@@ -8,7 +8,11 @@ import {
 } from "../services/showService";
 import type { Instrumento, SetlistMasterItem, Show } from "../types";
 
-export function useShowMaster(agrupacionId: string, showId: string) {
+export function useShowMaster(
+  agrupacionId: string,
+  showId: string,
+  directorId: string
+) {
     const [show, setShow] = useState<Show | null>(null);
     const [instrumentos, setInstrumentos] = useState<Instrumento[]>([]);
     const [loading, setLoading] = useState(true);
@@ -70,9 +74,9 @@ export function useShowMaster(agrupacionId: string, showId: string) {
 
     const addInstrumento = useCallback(
         async (nombre: string) => {
-            await createInstrumento(agrupacionId, showId, nombre);
+            await createInstrumento(agrupacionId, showId, nombre, directorId);
         },
-        [agrupacionId, showId]
+        [agrupacionId, directorId, showId]
     );
 
     const addObra = useCallback(

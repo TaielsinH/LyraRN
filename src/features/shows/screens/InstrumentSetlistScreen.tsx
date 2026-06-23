@@ -55,8 +55,21 @@ export default function InstrumentSetlistScreen() {
   const showId = getParam(params.showId);
   const instrumentoId = getParam(params.instrumentoId);
 
-  const { show, instrumento, loading, errorMessage, saveChanges } =
-    useInstrumentSetlist(agrupacionId, showId, instrumentoId);
+  const {
+    show,
+    instrumento,
+    loading,
+    errorMessage,
+    accessCode,
+    accessCodeLoading,
+    accessCodeError,
+    saveChanges,
+  } = useInstrumentSetlist(
+    agrupacionId,
+    showId,
+    instrumentoId,
+    user?.uid ?? ""
+  );
 
   const [materialSlots, setMaterialSlots] = useState<MaterialSlot[]>([]);
   const [dirty, setDirty] = useState(false);
@@ -82,6 +95,7 @@ export default function InstrumentSetlistScreen() {
     setMaterialSlots(nextMaterialSlots);
   }, [show, instrumento, dirty]);
 
+  const canCopyCode = Boolean(accessCode) && !accessCodeLoading;
   const canSave = dirty && !saving;
 
   const filteredCloudLibrary = useMemo(() => {
@@ -101,9 +115,9 @@ export default function InstrumentSetlistScreen() {
   }, [user, showId, instrumentoId]);
 
   async function copyCode() {
-    if (!instrumento?.codigoAcceso) return;
+    if (!canCopyCode) return;
 
-    await Clipboard.setStringAsync(instrumento.codigoAcceso);
+    await Clipboard.setStringAsync(accessCode);
     Alert.alert("Código copiado");
   }
 
@@ -456,13 +470,34 @@ export default function InstrumentSetlistScreen() {
 
         <View style={styles.codeBox}>
           <Text style={styles.codeText}>
-            Código: {instrumento.codigoAcceso || "Sin código"}
+            Código:{" "}
+            {accessCodeLoading
+              ? "Cargando..."
+              : accessCode || "Sin código"}
           </Text>
 
-          <Pressable style={styles.copyButton} onPress={copyCode}>
-            <Text style={styles.copyButtonText}>Copiar</Text>
+          <Pressable
+            style={[
+              styles.copyButton,
+              !canCopyCode && styles.copyButtonDisabled,
+            ]}
+            onPress={copyCode}
+            disabled={!canCopyCode}
+          >
+            <Text
+              style={[
+                styles.copyButtonText,
+                !canCopyCode && styles.copyButtonTextDisabled,
+              ]}
+            >
+              Copiar
+            </Text>
           </Pressable>
         </View>
+
+        {accessCodeError ? (
+          <Text style={styles.codeErrorText}>{accessCodeError}</Text>
+        ) : null}
 
         <Pressable
           style={[

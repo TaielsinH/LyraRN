@@ -59,10 +59,21 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 28,
     paddingVertical: 12,
   },
+  copyButtonDisabled: {
+    backgroundColor: "#334155",
+  },
   copyButtonText: {
     color: "#312e81",
     fontSize: 16,
     fontWeight: "700",
+  },
+  copyButtonTextDisabled: {
+    color: "#94a3b8",
+  },
+  codeErrorText: {
+    color: "#f87171",
+    fontSize: 14,
+    marginTop: 8,
   },
   saveButton: {
     alignSelf: "flex-start",
