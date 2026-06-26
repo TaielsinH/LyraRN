@@ -1,15 +1,17 @@
 import {
-    arrayUnion,
-    collection,
-    doc,
-    getDoc,
-    getDocs,
-    query,
-    updateDoc,
-    where,
+  arrayUnion,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  updateDoc,
+  where,
 } from "firebase/firestore";
 
 import { db } from "../../../services/firebase";
+import { notificarNuevoMusicoEnSetlist } from "../../../services/notificationService";
+import { obtenerTokenFcmDeUsuario } from "../../auth/services/authService";
 import type { ShowSetlistSuscripto } from "../types";
 
 type CodigoSetlistInstrumentoFirestore = {
@@ -19,6 +21,7 @@ type CodigoSetlistInstrumentoFirestore = {
   instrumentoId?: string;
   codigo?: string;
   suscriptores?: string[];
+  directorId?: string;
 };
 
 type ShowFirestore = {
@@ -92,6 +95,20 @@ async function buildShowSetlistSuscripto(
   } satisfies ShowSetlistSuscripto;
 }
 
+async function notificarDirector(
+  directorId: string,
+  nombreSetlist: string
+): Promise<void> {
+  try {
+    const tokenDirector = await obtenerTokenFcmDeUsuario(directorId);
+    if (tokenDirector) {
+      await notificarNuevoMusicoEnSetlist(tokenDirector, nombreSetlist);
+    }
+  } catch (error) {
+    console.warn("No se pudo notificar al director:", error);
+  }
+}
+
 export async function suscribirseAShowPorCodigo(
   codigo: string,
   userId: string
@@ -117,7 +134,7 @@ export async function suscribirseAShowPorCodigo(
     throw new Error("Código no encontrado.");
   }
 
-  const codigoData =
+   const codigoData =
     codigoSnapshot.data() as CodigoSetlistInstrumentoFirestore & {
       directorId?: string;
     };
@@ -141,6 +158,23 @@ export async function suscribirseAShowPorCodigo(
   await updateDoc(codigoRef, {
     suscriptores: arrayUnion(userId),
   });
+
+  const showRef = doc(
+    db,
+    "agrupaciones",
+    codigoData.agrupacionId,
+    "shows",
+    codigoData.showId
+  );
+  const showSnapshot = await getDoc(showRef);
+  const nombreShow =
+    showSnapshot.exists()
+      ? ((showSnapshot.data() as ShowFirestore).nombre ?? "un show")
+      : "un show";
+      
+  if (codigoData.directorId) {
+    await notificarDirector(codigoData.directorId, nombreShow);
+  }
 
   const showSuscripto = await buildShowSetlistSuscripto(
     codigoSnapshot.id,
@@ -172,7 +206,7 @@ export async function cargarShowSetlistsSuscriptos(
   }
 
   const tareas = snapshot.docs.map(async (codigoDoc) => {
-    const codigoData =
+     const codigoData =
       codigoDoc.data() as CodigoSetlistInstrumentoFirestore;
 
     return buildShowSetlistSuscripto(codigoDoc.id, codigoData);
@@ -180,7 +214,7 @@ export async function cargarShowSetlistsSuscriptos(
 
   const lista = await Promise.all(tareas);
 
-  return lista.filter(
+    return lista.filter(
     (item): item is ShowSetlistSuscripto => item !== null
   );
 }
