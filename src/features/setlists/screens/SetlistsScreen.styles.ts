@@ -4,16 +4,17 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#0F172A",
   },
   center: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#0F172A",
     gap: 8,
   },
   loadingText: {
-    color: "#6b7280",
+    color: "#CBD5E1",
   },
   header: {
     alignItems: "center",
@@ -25,15 +26,16 @@ export const styles = StyleSheet.create({
     padding: 4,
   },
   title: {
+    color: "#FFFFFF",
     fontSize: 22,
     fontWeight: "700",
   },
   error: {
-    color: "#dc2626",
+    color: "#FCA5A5",
     marginBottom: 12,
   },
   empty: {
-    color: "#6b7280",
+    color: "#CBD5E1",
     textAlign: "center",
     marginTop: 40,
   },

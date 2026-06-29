@@ -60,7 +60,7 @@ export function ShowSetlistsSuscriptosScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator />
+        <ActivityIndicator color="#FFFFFF" />
         <Text style={styles.loadingText}>Cargando shows...</Text>
       </View>
     );

@@ -3,14 +3,14 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: "#0F172A",
     paddingHorizontal: 16,
     paddingTop: 20,
   },
 
   centerContainer: {
     flex: 1,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: "#0F172A",
     justifyContent: "center",
     alignItems: "center",
     gap: 12,
@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
 
   loadingText: {
     fontSize: 14,
-    color: "#625B71",
+    color: "#CBD5E1",
   },
 
   header: {
@@ -28,21 +28,21 @@ export const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: "700",
-    color: "#1D1B20",
+    color: "#FFFFFF",
   },
 
   subtitle: {
     marginTop: 4,
     fontSize: 14,
-    color: "#625B71",
+    color: "#CBD5E1",
   },
 
   errorText: {
     marginBottom: 12,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: "#FCEEEE",
-    color: "#B3261E",
+    backgroundColor: "#451A1A",
+    color: "#FCA5A5",
     fontSize: 14,
   },
 
@@ -52,21 +52,21 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderBottomWidth: 1,
-    borderBottomColor: "#E7E0EC",
+    borderBottomColor: "#334155",
   },
 
   tableHeaderOrder: {
     width: 36,
     fontSize: 12,
     fontWeight: "700",
-    color: "#625B71",
+    color: "#CBD5E1",
   },
 
   tableHeaderSong: {
     flex: 1,
     fontSize: 12,
     fontWeight: "700",
-    color: "#625B71",
+    color: "#CBD5E1",
   },
 
   tableHeaderStatus: {
@@ -74,7 +74,7 @@ export const styles = StyleSheet.create({
     textAlign: "right",
     fontSize: 12,
     fontWeight: "700",
-    color: "#625B71",
+    color: "#CBD5E1",
   },
 
   listContent: {
@@ -90,13 +90,13 @@ export const styles = StyleSheet.create({
     minHeight: 56,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#1E293B",
     borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: "#E7E0EC",
+    borderColor: "#334155",
   },
 
   orderContainer: {
@@ -106,7 +106,7 @@ export const styles = StyleSheet.create({
   orderText: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#625B71",
+    color: "#CBD5E1",
   },
 
   songContainer: {
@@ -117,7 +117,7 @@ export const styles = StyleSheet.create({
   songName: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#1D1B20",
+    color: "#FFFFFF",
   },
 
   pdfBadge: {
@@ -160,14 +160,14 @@ export const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1D1B20",
+    color: "#FFFFFF",
     textAlign: "center",
   },
 
   emptyText: {
     marginTop: 8,
     fontSize: 14,
-    color: "#625B71",
+    color: "#CBD5E1",
     textAlign: "center",
   },
 });

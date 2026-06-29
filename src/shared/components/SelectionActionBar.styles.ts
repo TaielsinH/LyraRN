@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 16,
     fontWeight: "600",
-    color: "#111827",
+    color: "#FFFFFF",
   },
   actions: {
     flexDirection: "row",
@@ -32,7 +32,9 @@ export const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#f3f4f6",
+    backgroundColor: "#1E293B",
+    borderColor: "#334155",
+    borderWidth: 1,
   },
   actionButtonDisabled: {
     opacity: 0.5,

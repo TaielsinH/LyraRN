@@ -3,14 +3,14 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: "#0F172A",
     paddingHorizontal: 16,
     paddingTop: 20,
   },
 
   centerContainer: {
     flex: 1,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: "#0F172A",
     justifyContent: "center",
     alignItems: "center",
     gap: 12,
@@ -18,28 +18,28 @@ export const styles = StyleSheet.create({
 
   loadingText: {
     fontSize: 14,
-    color: "#625B71",
+    color: "#CBD5E1",
   },
 
   title: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#1D1B20",
+    color: "#FFFFFF",
   },
 
   subtitle: {
     marginTop: 4,
     marginBottom: 16,
     fontSize: 14,
-    color: "#625B71",
+    color: "#CBD5E1",
   },
 
   errorText: {
     marginBottom: 12,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: "#FCEEEE",
-    color: "#B3261E",
+    backgroundColor: "#451A1A",
+    color: "#FCA5A5",
     fontSize: 14,
   },
 
@@ -52,12 +52,12 @@ export const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#1E293B",
     borderRadius: 18,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#E7E0EC",
+    borderColor: "#334155",
   },
 
   cardHeader: {
@@ -69,7 +69,7 @@ export const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#EADDFF",
+    backgroundColor: "#2563EB",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
@@ -78,7 +78,7 @@ export const styles = StyleSheet.create({
   iconText: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#4F378B",
+    color: "#FFFFFF",
   },
 
   titleContainer: {
@@ -88,13 +88,13 @@ export const styles = StyleSheet.create({
   showName: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#1D1B20",
+    color: "#FFFFFF",
   },
 
   instrumentName: {
     marginTop: 2,
     fontSize: 14,
-    color: "#625B71",
+    color: "#CBD5E1",
   },
 
   infoRow: {
@@ -103,13 +103,13 @@ export const styles = StyleSheet.create({
 
   infoText: {
     fontSize: 13,
-    color: "#625B71",
+    color: "#94A3B8",
   },
 
   codeText: {
     marginTop: 10,
     fontSize: 12,
-    color: "#79747E",
+    color: "#94A3B8",
   },
 
   emptyContainer: {
@@ -122,14 +122,14 @@ export const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#1D1B20",
+    color: "#FFFFFF",
     textAlign: "center",
   },
 
   emptyText: {
     marginTop: 8,
     fontSize: 14,
-    color: "#625B71",
+    color: "#CBD5E1",
     textAlign: "center",
   },
 });

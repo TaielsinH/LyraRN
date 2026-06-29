@@ -193,7 +193,7 @@ export default function SetlistsScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.center}>
-        <ActivityIndicator />
+        <ActivityIndicator color="#FFFFFF" />
         <Text style={styles.loadingText}>Cargando setlists...</Text>
       </SafeAreaView>
     );
@@ -211,7 +211,7 @@ export default function SetlistsScreen() {
       ) : (
         <View style={styles.header}>
           <Pressable onPress={openMenu} style={styles.hamburgerButton} hitSlop={8}>
-            <Ionicons name="menu" size={26} color="#111827" />
+            <Ionicons name="menu" size={26} color="#FFFFFF" />
           </Pressable>
           <Text style={styles.title}>Mis Setlists</Text>
         </View>

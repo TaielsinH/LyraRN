@@ -44,7 +44,7 @@ export default function LoginScreen() {
   if (authLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator color="#FFFFFF" size="large" />
         <Text style={styles.loadingText}>Cargando sesion...</Text>
       </View>
     );

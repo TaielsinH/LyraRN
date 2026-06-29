@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f8f8",
+    backgroundColor: "#0F172A",
     padding: 20,
   },
   header: {
@@ -16,34 +16,35 @@ export const styles = StyleSheet.create({
     padding: 4,
   },
   backText: {
-    color: "#5b3f96",
+    color: "#93C5FD",
     fontSize: 15,
     fontWeight: "600",
     marginBottom: 12,
   },
   title: {
+    color: "#FFFFFF",
     fontSize: 22,
     fontWeight: "800",
   },
   subtitle: {
     marginTop: 4,
     fontSize: 16,
-    color: "#666666",
+    color: "#CBD5E1",
   },
   listContent: {
     gap: 12,
     paddingBottom: 120,
   },
   card: {
-    backgroundColor: "#ffffff",
+    backgroundColor: "#1E293B",
     borderRadius: 14,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#e5e5e5",
+    borderColor: "#334155",
   },
   cardSelected: {
-    borderColor: "#5b3f96",
-    backgroundColor: "#f5f3fb",
+    borderColor: "#60A5FA",
+    backgroundColor: "#172554",
   },
   checkbox: {
     position: "absolute",
@@ -51,25 +52,26 @@ export const styles = StyleSheet.create({
     right: 12,
   },
   cardTitle: {
+    color: "#FFFFFF",
     fontSize: 18,
     fontWeight: "700",
   },
   cardSubtitle: {
     marginTop: 6,
-    color: "#555555",
+    color: "#CBD5E1",
   },
   cardMeta: {
     marginTop: 8,
-    color: "#777777",
+    color: "#94A3B8",
     fontSize: 13,
   },
   emptyText: {
     marginTop: 24,
-    color: "#666666",
+    color: "#CBD5E1",
     textAlign: "center",
   },
   errorText: {
-    color: "#b00020",
+    color: "#FCA5A5",
     marginTop: 12,
   },
 });

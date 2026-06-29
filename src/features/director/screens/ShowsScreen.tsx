@@ -184,7 +184,7 @@ export default function ShowsScreen({ showHamburger = true }: { showHamburger?: 
         showHamburger ? (
           <View style={styles.header}>
             <Pressable onPress={openMenu} style={styles.hamburgerButton} hitSlop={8}>
-              <Ionicons name="menu" size={26} color="#111827" />
+              <Ionicons name="menu" size={26} color="#FFFFFF" />
             </Pressable>
             <Text style={styles.title}>{agrupacionNombre}</Text>
           </View>
@@ -192,7 +192,7 @@ export default function ShowsScreen({ showHamburger = true }: { showHamburger?: 
       )}
 
       {loading ? (
-        <ActivityIndicator />
+        <ActivityIndicator color="#FFFFFF" />
       ) : (
         <FlatList
           data={shows}

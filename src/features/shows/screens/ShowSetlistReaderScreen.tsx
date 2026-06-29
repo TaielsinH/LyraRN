@@ -71,7 +71,7 @@ export function ShowSetlistReaderScreen() {
   if (loading) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator />
+        <ActivityIndicator color="#FFFFFF" />
         <Text style={styles.loadingText}>Cargando setlist...</Text>
       </View>
     );

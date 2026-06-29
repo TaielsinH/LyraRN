@@ -3,23 +3,23 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F5F7FA",
+    backgroundColor: "#0F172A",
     justifyContent: "center",
     padding: 24,
   },
   centered: {
     flex: 1,
     alignItems: "center",
-    backgroundColor: "#F5F7FA",
+    backgroundColor: "#0F172A",
     justifyContent: "center",
     padding: 24,
   },
   loadingText: {
-    color: "#475569",
+    color: "#CBD5E1",
     marginTop: 12,
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#1E293B",
     borderRadius: 8,
     elevation: 3,
     padding: 24,
@@ -32,14 +32,14 @@ export const styles = StyleSheet.create({
     shadowRadius: 8,
   },
   title: {
-    color: "#111827",
+    color: "#FFFFFF",
     fontSize: 32,
     fontWeight: "700",
     marginBottom: 8,
     textAlign: "center",
   },
   subtitle: {
-    color: "#64748B",
+    color: "#CBD5E1",
     fontSize: 16,
     marginBottom: 28,
     textAlign: "center",
@@ -51,22 +51,22 @@ export const styles = StyleSheet.create({
     gap: 8,
   },
   label: {
-    color: "#334155",
+    color: "#E2E8F0",
     fontSize: 14,
     fontWeight: "600",
   },
   input: {
-    backgroundColor: "#FFFFFF",
-    borderColor: "#CBD5E1",
+    backgroundColor: "#0F172A",
+    borderColor: "#334155",
     borderRadius: 8,
     borderWidth: 1,
-    color: "#111827",
+    color: "#FFFFFF",
     fontSize: 16,
     minHeight: 48,
     paddingHorizontal: 14,
   },
   error: {
-    color: "#B91C1C",
+    color: "#FCA5A5",
     fontSize: 14,
   },
   button: {

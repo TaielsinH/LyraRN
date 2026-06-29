@@ -24,7 +24,7 @@ export function SelectionActionBar({
   return (
     <View style={styles.container}>
       <Pressable onPress={onCancel} style={styles.cancelButton} hitSlop={8}>
-        <Ionicons name="close" size={24} color="#6b7280" />
+        <Ionicons name="close" size={24} color="#E5E7EB" />
       </Pressable>
 
       <Text style={styles.countText}>
@@ -39,7 +39,7 @@ export function SelectionActionBar({
             style={[styles.actionButton, !canEdit && styles.actionButtonDisabled]}
             hitSlop={8}
           >
-            <Ionicons name="pencil" size={20} color={canEdit ? "#6b7280" : "#d1d5db"} />
+            <Ionicons name="pencil" size={20} color={canEdit ? "#E5E7EB" : "#64748B"} />
           </Pressable>
         ) : null}
 
@@ -50,9 +50,9 @@ export function SelectionActionBar({
           hitSlop={8}
         >
           {deleting ? (
-            <ActivityIndicator size="small" color="#6b7280" />
+            <ActivityIndicator size="small" color="#E5E7EB" />
           ) : (
-            <Ionicons name="trash" size={20} color={canDelete ? "#6b7280" : "#d1d5db"} />
+            <Ionicons name="trash" size={20} color={canDelete ? "#E5E7EB" : "#64748B"} />
           )}
         </Pressable>
       </View>
