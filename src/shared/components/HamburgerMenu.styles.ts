@@ -8,7 +8,7 @@ export const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
   },
   backdropPressable: {
     flex: 1,
@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
     bottom: 0,
     width: "78%",
     maxWidth: 320,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#1E293B",
     shadowColor: "#000",
     shadowOffset: { width: 4, height: 0 },
     shadowOpacity: 0.12,
@@ -37,7 +37,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   sectionLabel: {
-    color: "#9ca3af",
+    color: "#94A3B8",
     fontSize: 11,
     fontWeight: "600",
     letterSpacing: 1.2,
@@ -49,7 +49,7 @@ export const styles = StyleSheet.create({
   },
   sectionDivider: {
     height: 1,
-    backgroundColor: "#e5e7eb",
+    backgroundColor: "#334155",
     marginTop: 8,
     marginBottom: 12,
   },
@@ -66,7 +66,7 @@ export const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 15,
-    color: "#1f2937",
+    color: "#FFFFFF",
     fontWeight: "400",
   },
   agrupacionDot: {
@@ -77,12 +77,12 @@ export const styles = StyleSheet.create({
   },
   logoutButton: {
     borderTopWidth: 1,
-    borderTopColor: "#e5e7eb",
+    borderTopColor: "#334155",
     paddingVertical: 20,
     paddingHorizontal: 24,
   },
   logoutText: {
-    color: "#dc2626",
+    color: "#FCA5A5",
     fontSize: 15,
     fontWeight: "500",
   },

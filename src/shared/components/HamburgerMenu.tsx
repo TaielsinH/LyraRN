@@ -74,7 +74,7 @@ export function HamburgerMenu({ visible, onClose }: Props) {
         setIsModalRendered(false);
       });
     }
-  }, [visible]);
+  }, [backdropOpacity, translateX, visible]);
 
   async function handleLogout() {
     onClose();
@@ -137,7 +137,7 @@ export function HamburgerMenu({ visible, onClose }: Props) {
               onPress={handleShowsPress}
               activeOpacity={0.6}
             >
-              <Ionicons name="calendar-outline" size={19} color="#374151" style={styles.menuItemIcon} />
+              <Ionicons name="calendar-outline" size={19} color="#94A3B8" style={styles.menuItemIcon} />
               <Text style={styles.menuItemText}>Shows</Text>
             </TouchableOpacity>
 
@@ -146,7 +146,7 @@ export function HamburgerMenu({ visible, onClose }: Props) {
               onPress={handleSetlistsPress}
               activeOpacity={0.6}
             >
-              <Ionicons name="musical-notes-outline" size={19} color="#374151" style={styles.menuItemIcon} />
+              <Ionicons name="musical-notes-outline" size={19} color="#94A3B8" style={styles.menuItemIcon} />
               <Text style={styles.menuItemText}>Mis Setlists</Text>
             </TouchableOpacity>
 
