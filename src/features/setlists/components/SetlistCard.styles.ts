@@ -2,34 +2,78 @@ import { StyleSheet } from "react-native";
 
 export const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#f3f4f6",
-    padding: 16,
-    borderRadius: 14,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "transparent",
+    minHeight: 70,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 17,
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+
+    marginHorizontal: 28,
+    marginBottom: 20,
+
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    elevation: 2,
   },
+
+  cardPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.995 }],
+  },
+
   cardSelected: {
-    borderColor: "#5b3f96",
-    backgroundColor: "#f5f3fb",
+    borderWidth: 2,
+    borderColor: "#6D4CC2",
   },
-  checkbox: {
-    position: "absolute",
-    top: 12,
-    right: 12,
+
+  iconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+
+    backgroundColor: "#F3F6FA",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginRight: 18,
   },
+
+  content: {
+    flex: 1,
+    justifyContent: "center",
+  },
+
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "700",
+    color: "#111827",
   },
+
   subtitle: {
-    fontSize: 14,
-    color: "#4b5563",
     marginTop: 4,
+    fontSize: 16,
+    color: "#6B7280",
   },
-  meta: {
-    fontSize: 13,
-    color: "#6b7280",
-    marginTop: 8,
+
+  rightDot: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#F3F6FA",
+    marginLeft: 14,
+  },
+
+  checkbox: {
+    marginLeft: 14,
   },
 });

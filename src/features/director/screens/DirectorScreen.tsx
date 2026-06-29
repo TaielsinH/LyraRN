@@ -12,10 +12,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { FloatingActionButton } from "../../../shared/components/FloatingActionButton";
 import { SelectionActionBar } from "../../../shared/components/SelectionActionBar";
-import { SelectionCheckbox } from "../../../shared/components/SelectionCheckbox";
 import { HamburgerMenu } from "../../../shared/components/HamburgerMenu";
 import { useHamburgerMenu } from "../../../shared/hooks/useHamburgerMenu";
 import { useAuth } from "../../auth/context/AuthContext";
+import { AgrupacionCard } from "../components/AgrupacionCard";
 import { CreateAgrupacionDialog } from "../components/CreateAgrupacionDialog";
 import { EditAgrupacionDialog } from "../components/EditAgrupacionDialog";
 import { useAgrupaciones } from "../hooks/useAgrupaciones";
@@ -36,6 +36,7 @@ export default function DirectorScreen() {
 
   const {
     agrupaciones,
+    showCountsByAgrupacionId,
     loading,
     creating,
     updating,
@@ -44,7 +45,7 @@ export default function DirectorScreen() {
     createNewAgrupacion,
     updateAgrupacionNombre,
     deleteAgrupaciones,
-  } = useAgrupaciones(user?.uid);
+  } = useAgrupaciones(user?.uid, { includeShowCounts: true });
 
   async function handleCreateAgrupacion(nombre: string) {
     await createNewAgrupacion(nombre);
@@ -138,16 +139,14 @@ export default function DirectorScreen() {
     const selected = selectedIds.has(item.id);
 
     return (
-      <Pressable
-        style={[styles.card, selected && styles.cardSelected]}
+      <AgrupacionCard
+        nombre={item.nombre}
+        showCount={showCountsByAgrupacionId[item.id] ?? 0}
+        selected={selected}
+        selectionMode={selectionMode}
         onPress={() => handleCardPress(item)}
         onLongPress={() => handleLongPress(item)}
-      >
-        <Text style={styles.cardTitle}>{item.nombre}</Text>
-        {selectionMode ? (
-          <SelectionCheckbox selected={selected} style={styles.checkbox} />
-        ) : null}
-      </Pressable>
+      />
     );
   }
 
@@ -164,20 +163,20 @@ export default function DirectorScreen() {
       ) : (
         <View style={styles.headerRow}>
           <Pressable onPress={openMenu} style={styles.hamburgerButton} hitSlop={8}>
-            <Ionicons name="menu" size={26} color="#111827" />
+            <Ionicons name="menu" size={26} color="#FFFFFF" />
           </Pressable>
           <Text style={styles.title}>Panel de director</Text>
         </View>
       )}
 
       {loading ? (
-        <ActivityIndicator />
+        <ActivityIndicator color="#FFFFFF" style={styles.loadingIndicator} />
       ) : (
         <FlatList
           data={agrupaciones}
           keyExtractor={(item) => item.id}
           renderItem={renderAgrupacion}
-          extraData={selectedIds}
+          extraData={{ selectedIds, showCountsByAgrupacionId }}
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <Text style={styles.emptyText}>

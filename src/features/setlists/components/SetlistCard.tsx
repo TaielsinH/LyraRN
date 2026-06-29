@@ -1,4 +1,6 @@
-import { Pressable, Text } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Pressable, Text, View } from "react-native";
+
 import { SelectionCheckbox } from "../../../shared/components/SelectionCheckbox";
 import type { Setlist } from "../types";
 import { styles } from "./SetlistCard.styles";
@@ -18,25 +20,42 @@ export function SetlistCard({
   selected = false,
   selectionMode = false,
 }: SetlistCardProps) {
+  const scoreCount = setlist.partituras?.length ?? 0;
+
   return (
     <Pressable
-      style={[styles.card, selected && styles.cardSelected]}
       onPress={onPress}
       onLongPress={onLongPress}
+      style={({ pressed }) => [
+        styles.card,
+        selected && styles.cardSelected,
+        pressed && styles.cardPressed,
+      ]}
     >
-      <Text style={styles.title}>{setlist.titulo}</Text>
+      <View style={styles.iconContainer}>
+        <MaterialCommunityIcons
+          name="playlist-music"
+          size={28}
+          color="#111827"
+        />
+      </View>
 
-      {setlist.nombreGrupo ? (
-        <Text style={styles.subtitle}>{setlist.nombreGrupo}</Text>
-      ) : null}
+      <View style={styles.content}>
+        <Text numberOfLines={1} style={styles.title}>
+          {setlist.titulo}
+        </Text>
 
-      <Text style={styles.meta}>
-        {setlist.partituras.length ?? 0} partituras
-      </Text>
+        <Text numberOfLines={1} style={styles.subtitle}>
+          {setlist.nombreGrupo || "Sin grupo"} - {scoreCount}{" "}
+          {scoreCount === 1 ? "score" : "scores"}
+        </Text>
+      </View>
 
       {selectionMode ? (
         <SelectionCheckbox selected={selected} style={styles.checkbox} />
-      ) : null}
+      ) : (
+        <View style={styles.rightDot} />
+      )}
     </Pressable>
   );
 }

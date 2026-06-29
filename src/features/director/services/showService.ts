@@ -1,6 +1,7 @@
 import {
     collection,
     doc,
+    getCountFromServer,
     getDocs,
     query,
     setDoc,
@@ -49,6 +50,16 @@ export async function getShowsByAgrupacion(
     return snapshot.docs
         .map((document) => document.data() as Show)
         .sort((a, b) => a.nombre.localeCompare(b.nombre));
+}
+
+export async function getActiveShowCountByAgrupacion(
+  agrupacionId: string
+): Promise<number> {
+  const showsRef = collection(db, "agrupaciones", agrupacionId, "shows");
+  const q = query(showsRef, where("active", "==", true));
+  const snapshot = await getCountFromServer(q);
+
+  return snapshot.data().count;
 }
 
 type UpdateShowParams = {

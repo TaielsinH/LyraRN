@@ -6,10 +6,35 @@ import {
     softDeleteAgrupaciones,
     updateAgrupacion,
 } from "../services/agrupacionService";
+import { getActiveShowCountByAgrupacion } from "../services/showService";
 import type { Agrupacion } from "../types";
 
-export function useAgrupaciones(directorId?: string) {
+type UseAgrupacionesOptions = {
+  includeShowCounts?: boolean;
+};
+
+async function getShowCountsByAgrupacion(
+  agrupaciones: Agrupacion[]
+): Promise<Record<string, number>> {
+  const entries = await Promise.all(
+    agrupaciones.map(async (agrupacion) => {
+      const count = await getActiveShowCountByAgrupacion(agrupacion.id);
+      return [agrupacion.id, count] as const;
+    })
+  );
+
+  return Object.fromEntries(entries);
+}
+
+export function useAgrupaciones(
+  directorId?: string,
+  options: UseAgrupacionesOptions = {}
+) {
+  const includeShowCounts = options.includeShowCounts ?? false;
   const [agrupaciones, setAgrupaciones] = useState<Agrupacion[]>([]);
+  const [showCountsByAgrupacionId, setShowCountsByAgrupacionId] = useState<
+    Record<string, number>
+  >({});
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -19,6 +44,7 @@ export function useAgrupaciones(directorId?: string) {
   const loadAgrupaciones = useCallback(async () => {
     if (!directorId) {
       setAgrupaciones([]);
+      setShowCountsByAgrupacionId({});
       return;
     }
 
@@ -27,14 +53,19 @@ export function useAgrupaciones(directorId?: string) {
       setErrorMessage("");
 
       const data = await getAgrupacionesByDirector(directorId);
+      const showCounts = includeShowCounts
+        ? await getShowCountsByAgrupacion(data)
+        : {};
+
       setAgrupaciones(data);
+      setShowCountsByAgrupacionId(showCounts);
     } catch (error) {
       console.error(error);
       setErrorMessage("No se pudieron cargar las agrupaciones.");
     } finally {
       setLoading(false);
     }
-  }, [directorId]);
+  }, [directorId, includeShowCounts]);
 
   const createNewAgrupacion = useCallback(
     async (nombre: string) => {
@@ -56,6 +87,10 @@ export function useAgrupaciones(directorId?: string) {
             a.nombre.localeCompare(b.nombre)
           )
         );
+        setShowCountsByAgrupacionId((current) => ({
+          ...current,
+          [nuevaAgrupacion.id]: 0,
+        }));
 
         return nuevaAgrupacion;
       } catch (error) {
@@ -119,6 +154,11 @@ export function useAgrupaciones(directorId?: string) {
       setAgrupaciones((current) =>
         current.filter((item) => !ids.includes(item.id))
       );
+      setShowCountsByAgrupacionId((current) =>
+        Object.fromEntries(
+          Object.entries(current).filter(([id]) => !ids.includes(id))
+        )
+      );
     } catch (error) {
       console.error(error);
 
@@ -141,6 +181,7 @@ export function useAgrupaciones(directorId?: string) {
 
   return {
     agrupaciones,
+    showCountsByAgrupacionId,
     loading,
     creating,
     updating,

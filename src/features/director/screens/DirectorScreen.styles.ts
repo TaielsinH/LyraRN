@@ -3,53 +3,38 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: "#F8F8F8",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    backgroundColor: "#0F172A",
   },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   hamburgerButton: {
     padding: 4,
   },
   title: {
-    fontSize: 22,
-    fontWeight: "700",
+    color: "#FFFFFF",
+    fontSize: 24,
+    fontWeight: "800",
   },
   listContent: {
-    gap: 12,
-    paddingBottom: 100,
+    gap: 16,
+    paddingBottom: 120,
   },
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#E5E5E5",
-  },
-  cardSelected: {
-    borderColor: "#5b3f96",
-    backgroundColor: "#f5f3fb",
-  },
-  checkbox: {
-    position: "absolute",
-    top: 12,
-    right: 12,
-  },
-  cardTitle: {
-    fontSize: 17,
-    fontWeight: "600",
+  loadingIndicator: {
+    marginTop: 32,
   },
   emptyText: {
-    color: "#666666",
+    color: "#CBD5E1",
     marginTop: 24,
     textAlign: "center",
   },
   errorText: {
-    color: "#B00020",
+    color: "#FCA5A5",
     marginTop: 12,
   },
   floatingButton: {
