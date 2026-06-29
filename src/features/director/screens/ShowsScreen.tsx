@@ -154,16 +154,22 @@ export default function ShowsScreen({ showHamburger = true }: { showHamburger?: 
         onPress={() => handleCardPress(item)}
         onLongPress={() => handleLongPress(item)}
       >
-        <Text style={styles.cardTitle}>{item.nombre}</Text>
-        <Text style={styles.cardSubtitle}>
-          {item.fecha ? `Fecha: ${item.fecha}` : "Sin fecha definida"}
-        </Text>
-        <Text style={styles.cardMeta}>
-          {item.setlistMaster.length} obras en setlist
-        </Text>
+        <View style={styles.cardIcon}>
+          <Ionicons name="calendar-outline" size={22} color="#0F172A" />
+        </View>
+
+        <View style={styles.cardContent}>
+          <Text style={styles.cardTitle}>{item.nombre}</Text>
+          {item.fecha ? (
+            <Text style={styles.cardSubtitle}>{item.fecha}</Text>
+          ) : null}
+        </View>
+
         {selectionMode ? (
           <SelectionCheckbox selected={selected} style={styles.checkbox} />
-        ) : null}
+        ) : (
+          <View style={styles.cardActionIndicator} />
+        )}
       </Pressable>
     );
   }
