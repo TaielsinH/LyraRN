@@ -47,7 +47,11 @@ export default function SetlistsScreen() {
     return setlists.filter((s) => s.titulo?.toLowerCase().includes(q));
   }, [setlists, searchQuery]);
 
-  const loadSetlists = useCallback(async () => {
+  const loadSetlists = useCallback(async (showLoader = true) => {
+    if (showLoader) {
+      setLoading(true);
+    }
+
     if (!user) {
       setSetlists([]);
       setLoading(false);
@@ -74,7 +78,7 @@ export default function SetlistsScreen() {
 
   async function handleRefresh() {
     setRefreshing(true);
-    await loadSetlists();
+    await loadSetlists(false);
   }
 
   function exitSelectionMode() {
@@ -192,9 +196,28 @@ export default function SetlistsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.center}>
-        <ActivityIndicator color="#FFFFFF" />
-        <Text style={styles.loadingText}>Cargando setlists...</Text>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Pressable onPress={openMenu} style={styles.hamburgerButton} hitSlop={8}>
+            <Ionicons name="menu" size={26} color="#FFFFFF" />
+          </Pressable>
+          <Text style={styles.title}>Mis Setlists</Text>
+        </View>
+
+        <View style={styles.loadingContainer}>
+          <View style={styles.loadingIndicatorShell}>
+            <ActivityIndicator color="#A78BFA" size="large" />
+          </View>
+          <Text style={styles.loadingTitle}>Cargando setlists</Text>
+          <Text style={styles.loadingText}>
+            Estamos trayendo tus repertorios.
+          </Text>
+        </View>
+
+        <HamburgerMenu
+          visible={menuVisible}
+          onClose={closeMenu}
+        />
       </SafeAreaView>
     );
   }
@@ -244,7 +267,12 @@ export default function SetlistsScreen() {
           />
         )}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#FFFFFF"
+            colors={["#A78BFA"]}
+          />
         }
         ListEmptyComponent={
           <Text style={styles.empty}>
