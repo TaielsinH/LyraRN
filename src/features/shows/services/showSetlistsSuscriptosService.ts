@@ -99,13 +99,18 @@ async function notificarDirector(
   directorId: string,
   nombreSetlist: string
 ): Promise<void> {
+  console.log("[NOTIF] notificarDirector llamado. directorId:", directorId);
   try {
     const tokenDirector = await obtenerTokenFcmDeUsuario(directorId);
+    console.log("[NOTIF] tokenDirector obtenido:", tokenDirector);
     if (tokenDirector) {
       await notificarNuevoMusicoEnSetlist(tokenDirector, nombreSetlist);
+      console.log("[NOTIF] Notificación enviada con éxito");
+    } else {
+      console.log("[NOTIF] El director no tiene fcmToken guardado");
     }
   } catch (error) {
-    console.warn("No se pudo notificar al director:", error);
+    console.warn("[NOTIF] No se pudo notificar al director:", error);
   }
 }
 
@@ -139,6 +144,8 @@ export async function suscribirseAShowPorCodigo(
       directorId?: string;
     };
 
+  console.log("[NOTIF] codigoData completo:", JSON.stringify(codigoData));
+
   if (codigoData.activo === false) {
     throw new Error("Este código está inactivo.");
   }
@@ -171,9 +178,13 @@ export async function suscribirseAShowPorCodigo(
     showSnapshot.exists()
       ? ((showSnapshot.data() as ShowFirestore).nombre ?? "un show")
       : "un show";
-      
+
+  console.log("[NOTIF] directorId antes de notificar:", codigoData.directorId);
+
   if (codigoData.directorId) {
     await notificarDirector(codigoData.directorId, nombreShow);
+  } else {
+    console.log("[NOTIF] codigoData NO tiene directorId, no se notifica");
   }
 
   const showSuscripto = await buildShowSetlistSuscripto(
