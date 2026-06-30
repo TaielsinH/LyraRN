@@ -95,7 +95,8 @@ export default function InstrumentSetlistScreen() {
     setMaterialSlots(nextMaterialSlots);
   }, [show, instrumento, dirty]);
 
-  const canCopyCode = Boolean(accessCode) && !accessCodeLoading;
+  const visibleAccessCode = accessCode || instrumento?.codigoAcceso || "";
+  const canCopyCode = Boolean(visibleAccessCode);
   const canSave = dirty && !saving;
 
   const filteredCloudLibrary = useMemo(() => {
@@ -117,7 +118,7 @@ export default function InstrumentSetlistScreen() {
   async function copyCode() {
     if (!canCopyCode) return;
 
-    await Clipboard.setStringAsync(accessCode);
+    await Clipboard.setStringAsync(visibleAccessCode);
     Alert.alert("Código copiado");
   }
 
@@ -471,9 +472,9 @@ export default function InstrumentSetlistScreen() {
         <View style={styles.codeBox}>
           <Text style={styles.codeText}>
             Código:{" "}
-            {accessCodeLoading
+            {accessCodeLoading && !visibleAccessCode
               ? "Cargando..."
-              : accessCode || "Sin código"}
+              : visibleAccessCode || "Sin código"}
           </Text>
 
           <Pressable

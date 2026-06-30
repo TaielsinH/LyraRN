@@ -2,7 +2,6 @@ import {
     collection,
     doc,
     getDocs,
-    limit,
     onSnapshot,
     query,
     runTransaction,
@@ -25,6 +24,10 @@ type CodigoSetlistInstrumento = InstrumentAccessCodeParams & {
   codigo: string;
   suscriptores: string[];
   activo: boolean;
+};
+
+type EnsureInstrumentAccessCodeOptions = {
+  allowLegacyMetadataBackfill?: boolean;
 };
 
 const ACCESS_CODE_RETRY_LIMIT = 10;
@@ -115,13 +118,32 @@ function buildCodigoSetlistInstrumento(
 
 function isSameInstrumentCode(
   data: DocumentData,
-  params: InstrumentAccessCodeParams
+  params: InstrumentAccessCodeParams,
+  { allowLegacyMetadataBackfill = false }: EnsureInstrumentAccessCodeOptions = {}
 ) {
-  return (
+  if (data.activo === false) {
+    return false;
+  }
+
+  const sameInstrument =
     data.agrupacionId === params.agrupacionId &&
     data.showId === params.showId &&
-    data.instrumentoId === params.instrumentoId &&
-    data.activo === true
+    data.instrumentoId === params.instrumentoId;
+
+  if (sameInstrument) {
+    return true;
+  }
+
+  if (!allowLegacyMetadataBackfill) {
+    return false;
+  }
+
+  return (
+    (data.agrupacionId === undefined ||
+      data.agrupacionId === params.agrupacionId) &&
+    (data.showId === undefined || data.showId === params.showId) &&
+    (data.instrumentoId === undefined ||
+      data.instrumentoId === params.instrumentoId)
   );
 }
 
@@ -155,20 +177,21 @@ async function findExistingInstrumentAccessCode(
     codigosRef,
     where("agrupacionId", "==", params.agrupacionId),
     where("showId", "==", params.showId),
-    where("instrumentoId", "==", params.instrumentoId),
-    where("activo", "==", true),
-    limit(1)
+    where("instrumentoId", "==", params.instrumentoId)
   );
 
   const snapshot = await getDocs(q);
-  const codigoDoc = snapshot.docs[0];
+  const codigoDoc = snapshot.docs.find(
+    (docSnap) => docSnap.data().activo !== false
+  );
 
   return codigoDoc ? normalizeAccessCode(codigoDoc.id) : "";
 }
 
 async function ensureInstrumentAccessCode(
   params: InstrumentAccessCodeParams,
-  codigo: string
+  codigo: string,
+  options?: EnsureInstrumentAccessCodeOptions
 ) {
   const normalizedCode = normalizeAccessCode(codigo);
 
@@ -194,7 +217,7 @@ async function ensureInstrumentAccessCode(
     if (codigoSnapshot.exists()) {
       const codigoData = codigoSnapshot.data();
 
-      if (!isSameInstrumentCode(codigoData, params)) {
+      if (!isSameInstrumentCode(codigoData, params, options)) {
         throw new AccessCodeUnavailableError();
       }
 
@@ -264,7 +287,9 @@ export async function getOrCreateInstrumentAccessCode(
 
   if (isGeneratedAccessCode(currentCode)) {
     try {
-      return await ensureInstrumentAccessCode(params, currentCode);
+      return await ensureInstrumentAccessCode(params, currentCode, {
+        allowLegacyMetadataBackfill: true,
+      });
     } catch (error) {
       if (!isAccessCodeUnavailable(error)) {
         throw error;
